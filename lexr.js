@@ -39,7 +39,7 @@ var lex = {
       lines: lex.list.BR.count,
       top: lex.sortArr(lex.objToArr(lex.list))
         .filter(function(v){
-          return 1;//util.isRelevant(v.word);
+          return util.isRelevant(v.word);
         })
         .slice(0, lex.cfg.topCount)
     };

@@ -20,6 +20,10 @@ body {
   overflow-y: scroll;
   border: solid 1px #ccc
 }
+#outputConfig input {
+  width: 20px;
+  margin: 0 4px;
+}
 .hilight {
   font-weight: bold;
 }

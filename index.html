@@ -70,9 +70,9 @@ I'm dreaming of angels sing
 In a cup of the harp and lamb to the weary world rejoices 
 They know
 -->
-  <p>Input</p>
+  <p>Input (edit and/or paste new text)</p>
   <textarea id="input"></textarea>
-  <p>Output</p>
+  <p id="outputConfig">Output</p>
   <div id="output"></div>
 <script>
 var composition = {stanzas: 5, lines: 4, count: 7},
@@ -171,6 +171,10 @@ var getAjax = function(){
 };
 
 $(document).ready(function(){
+
+  util.buildControls($('#outputConfig'), composition, function(composition){
+    $out.html(buildOutput(composition));
+  });
 
   $refresh.click(function(){
     $out.html(buildOutput(composition));

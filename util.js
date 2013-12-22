@@ -13,6 +13,21 @@ var util = {
 		.join();
 	},
   capitalize: function(string){
-    return string[0].toUpperCase() + string.slice(1);
+    return string[0] ? (string[0].toUpperCase() + string.slice(1)) : string;
+  },
+  buildControls: function($elem, obj, onChange){
+    var $form = $('<form/>').appendTo($elem),
+      returnFormObj = function() {
+        var obj = {};
+        $form.find('input').each(function(){ obj[$(this).prop('name')] = $(this).val(); });
+        onChange(obj);
+      };
+    $.each(obj, function(k,v){
+      $form
+        .append('<label for="'+k+'">'+k+'</label>')
+        .append(
+          $('<input type="text" name="'+k+'" value="'+v+'"/>').keyup(returnFormObj)
+        );
+    });
   }
 };
