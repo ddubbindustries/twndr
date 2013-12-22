@@ -1,0 +1,26 @@
+body {
+  font: 12px sans-serif;
+  padding: 10px;
+}
+.corpus {
+  height: 50px;
+  width: 100%;
+}
+#output {
+  border: lightGreen 1px solid;
+  font: 14px 'Georgia';
+  padding: 0 20px;
+  margin: 20px 0;
+}
+#dump {
+  display: none;
+  margin: 20px 0;
+  white-space: pre;
+  height: 400px;
+  overflow: hidden;
+  overflow-y: scroll;
+  border: solid 1px #ccc
+}
+.hilight {
+  font-weight: bold;
+}

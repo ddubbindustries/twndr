@@ -5,58 +5,15 @@
   Source can be edited via http://jsbin.com/kringle/44/edit
 -->
 <head>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
-<meta charset=utf-8 />
-<title>Kringlr</title>
-
-<style id="jsbin-css">
-body {
-  font: 12px sans-serif;
-  padding: 10px;
-}
-.corpus {
-  height: 50px;
-  width: 100%;
-}
-#output {
-  border: lightGreen 1px solid;
-  font: 14px 'Georgia';
-  padding: 0 20px;
-  margin: 20px 0;
-}
-#dump {
-  display: none;
-  margin: 20px 0;
-  white-space: pre;
-  height: 400px;
-  overflow: hidden;
-  overflow-y: scroll;
-  border: solid 1px #ccc
-}
-.hilight {
-  font-weight: bold;
-}
-</style>
+	<meta charset=utf-8 />
+	<title>Kringlr</title>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="util.js"></script>
+	<script src="lexr.js"></script>
 </head>
 <body>
   
-  <script>
-    util = {
-      commonWords: "br a able about above across after all almost along already also always am an and any anybody anyone anything anyway anyways anywhere apart are aren't around as ask asking at away be because been before behind being below best better between both but by c'mon came can can't cant clearly come comes could couldn't did didn't do does doesn't doing don't done each either else etc even ever every everybody everyone everything everywhere exactly except far few first followed following follows for from get gets getting given gives go goes going gone got gotten had hadn't happens hardly has hasn't have haven't having he he's her here here's hers herself him himself his how however i i'd i'll i'm i've if in instead into is isn't it it'd it'll it's its itself just keep keeps kept let's many may maybe me might more much my neither no not nothing now of oh ok okay old on once one ones only onto or other others our ours ourselves out over own probably quite really right said same saw say saying says see seeing seem seemed seeming seems seen she should shouldn't since so some somebody somehow someone something sometime sometimes somewhere soon still such sure take taken tell than that that's thats the their theirs them themselves then there there's theres these they they'd they'll they're they've this those though through thru to together too took toward towards tried tries truly try trying twice under unfortunately until up us use used uses using usually very vs was wasn't way we we'd we'll we're we've well went were weren't what what's when where where's whether which while who who's whoever whole whom whose will with within without won't would wouldn't yes yet you you'd you'll you're you've your yours yourself yourselves",
-      isInString: function(needle, haystack) {
-        return (' '+haystack+' ').indexOf(' '+needle+' ') > -1;
-      },
-      isRelevant: function(input) {
-        return !util.isInString(input.toLowerCase(), util.commonWords);
-      },
-      twitterScrape: function(str){
-        return str
-          .match(/\n\S[^\n]*/g)
-          .filter(function(v){return !(/^\nExpand|^\nFollowed/g).test(v);})
-          .join();
-      }
-    };
-  </script>
   <!-- best of:
   
 As far away the song high above the pudding 
@@ -945,124 +902,8 @@ var source = 'kringle',
     $refresh = $('<button/>').html('Refresh').appendTo('body'),
     $dump = $('<div id="dump"/>').appendTo('body'),
     log = function(k, v){console.log(k+':',v);},
-    dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));},
-    
-    lex = {
-      cfg: {
-        optimize: false,
-        power: 2,
-        topThreshold: 0.2,
-        topCount: 15,
-        bestScoreMaxTries: 50
-      },
-      meta: {},
-      list: {},
-      output: {},
-      capitalize: function(string){
-        return string[0].toUpperCase() + string.slice(1);
-      },
-      tokenize: function(corpus){
-        var tokens = corpus        
-          .replace(/(http|pic\.)\S*/g,'')
-          .replace(/\n+/g,' BR ')
-          .split(/[^A-Za-z0-9\'\\n\@\_\#]+/)
-          .slice(1);
-        return tokens;
-      },
-      build: function(corpus){
-        var words = lex.tokenize(corpus);
-        var time = new Date();
-        $.each(words, function(k, word){
-          lex.tally(word ,lex.list);
-          if (words[k+1]) {
-            if (!lex.list[word].next) lex.list[word].next = {};
-            lex.tally(words[k+1], lex.list[word].next);
-          }
-        });
-        // prevent double linebreak
-        delete lex.list.BR.next.BR;
-        lex.meta = {
-          buildTime: (new Date() - time) + 'ms',
-          rawCount: words.length,
-          tallyCount: Object.keys(lex.list).length,
-          lines: lex.list.BR.count,
-          top: lex.sortArr(lex.objToArr(lex.list))
-            .filter(function(v){
-              return util.isRelevant(v.word);
-            })
-            .slice(0, lex.cfg.topCount)
-        };
-        dump(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
-      },
-      tally: function(item, list, value){
-        var inc = value || 1;
-        if (list[item]) {
-          list[item].count += inc;
-        } else {
-          list[item] = {};
-          list[item].count = inc;
-        }
-        return list;
-      },
-      isInArr: function(arr, key, val) {
-        var found = false;
-        $.each(arr, function(k,v){
-          if (v[key] == val) found = v;
-        });
-        return found;
-      },
-      getPropArr: function(arr, key) {
-        var out = [];
-        $.each(arr, function(k,v){
-          out.push(v[key]);
-        });
-        return out;
-      },
-      removeByProp: function(arr, key, val) {
-        var out = [];
-        $.each(arr, function(k,v){
-          if (v[key] == val) out.push(v);
-        });
-        return out.length ? out : arr;
-      },
-      objToArr: function(obj){
-        var arr = [], tempObj = {};
-        $.each(obj, function(k,v){
-          tempObj = v;
-          tempObj.word = k;
-          arr.push(tempObj);
-        });
-        return arr;
-      },
-      sortArr: function(arr) {
-        return arr.sort(function(a,b){return b.count - a.count;});
-      },
-      redistributeArr: function(arr, power){
-        var out = [];
-        //if (1) return lex.sortArr(arr).slice(0,2);
-        $.each(arr, function(k,v){
-          var topWord = lex.meta.top[v.word];
-          //if (topWord) v.count = topWord.count;
-          for(var i=0, ii=Math.round(Math.pow(v.count, power)); i < ii; i++){
-            out.push(v);
-          }
-        });
-        return out;
-      },
-      getRandom: function(arr){
-        var i = Math.floor(Math.random()*arr.length);
-        return arr[i];
-      },
-      getWeightedRandom: function(obj, exclude){
-        var out = lex.objToArr(obj);
-            if (out.length == 1) return out[0];
-            out = out.filter(function(v){return v.word !== exclude;});
-            out = lex.redistributeArr(out, lex.cfg.power);
-            out = lex.getRandom(out);
-        return out;
-      }
-    };
-
+    dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
+ 
 var getScore = function(string, markup){
   var score = 0, words = string.split(' '), scoredWords = [], out = '';
   $.each(words, function(k,v){
@@ -1159,7 +1000,8 @@ $(document).ready(function(){
       $out.html(buildOutput(composition));
     }).click();  
     
-});
+});   
+
 </script>
 </body>
 </html>
