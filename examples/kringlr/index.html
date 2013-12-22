@@ -81,7 +81,6 @@ They know
 var composition = {stanzas: 5, lines: 4, count: 7},
     $input = $('#input'),
     $out = $('#output'),
-    $refresh = $('<button/>').html('Refresh').appendTo('body'),
     $dump = $('<div id="dump"/>').appendTo('body'),
     log = function(k, v){console.log(k+':',v);},
     dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
@@ -179,6 +178,7 @@ $(document).ready(function(){
     $out.html(buildOutput(composition));
   });
 
+  $refresh = $('<button/>').html('Refresh').appendTo('#configs'),
   $refresh.click(function(){
     $out.html(buildOutput(composition));
   });
