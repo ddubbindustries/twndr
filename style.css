@@ -2,7 +2,7 @@ body {
   font: 12px sans-serif;
   padding: 10px;
 }
-.corpus {
+#input {
   height: 50px;
   width: 100%;
 }
@@ -13,7 +13,6 @@ body {
   margin: 20px 0;
 }
 #dump {
-  display: none;
   margin: 20px 0;
   white-space: pre;
   height: 400px;

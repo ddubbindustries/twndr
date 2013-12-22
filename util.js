@@ -11,5 +11,8 @@ var util = {
 			.match(/\n\S[^\n]*/g)
 			.filter(function(v){return !(/^\nExpand|^\nFollowed/g).test(v);})
 		.join();
-	}
+	},
+  capitalize: function(string){
+    return string[0].toUpperCase() + string.slice(1);
+  }
 };
