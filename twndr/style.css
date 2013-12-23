@@ -1,0 +1,46 @@
+body {
+  font: 12px sans-serif;
+  padding: 10px;
+  background: darkGreen;
+}
+h1, h2, #configs {
+  color: white;
+}
+div, textarea, input {
+  border: none;
+  border-radius: 5px;
+}
+#input {
+  height: 100px;
+  width: 100%;
+  padding: 20px;
+  border: none;
+  display: block;
+  box-sizing: border-box;
+}
+#output {
+  background: white;
+  font: 14px 'Georgia';
+  padding: 1px 20px;
+  margin-bottom: 20px;
+}
+#dump {
+  margin: 20px 0;
+  white-space: pre;
+  height: 100px;
+  overflow: hidden;
+  overflow: scroll;
+  background: white;
+}
+#configs input[type=text] {
+  width: 40px;
+  margin: 0 4px;
+  text-align: center;
+}
+.stats {
+  font: 10px sans-serif;
+  color: #999;
+}
+.hilight {
+  font-weight: bold;
+}
