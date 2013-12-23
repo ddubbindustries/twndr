@@ -1,10 +1,3 @@
-var composition = {stanzas: 5, lines: 4, count: 7},
-    $input = $('#input'),
-    $out = $('#output'),
-    $dump = $('<div id="dump"/>').appendTo('body'),
-    log = function(k, v){console.log(k+':',v);},
-    dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
- 
 var getScore = function(string, markup){
   var score = 0, words = string.split(' '), scoredWords = [], out = '';
   $.each(words, function(k,v){
@@ -31,45 +24,6 @@ var getBestScore = function(lines, wordsPerLine, scoreMin){
   }
   return getScore(best.txt, true)+' / '+k+' tries / '+ best.txt.length+' chars';
 };
-var generateLines = function(newlineMax, wordsPerLine) {
-  var i = 0,
-      ii = newlineMax * wordsPerLine,
-      //timer = new Date(),
-      lineCount = 0,
-      newline = 0,
-      exclude = 'BR',
-      item = lex.getWeightedRandom(lex.list, exclude), //lex.list.BR,
-      output = '';
-  while (newline < newlineMax && i < ii) {
-    output += item.word.replace('BR',/*'| '+lineCount+*/'<br/>')+' ';
-    if (item.word == 'BR') {
-      newline++;
-      lineCount = 0;
-    }
-    if (lineCount < wordsPerLine * 0.75) exclude = 'BR';
-    if (lineCount > wordsPerLine) exclude = item.word;
-    var nextWord = lex.getWeightedRandom(item.next ? item.next : lex.list, exclude).word;
-    item = lex.list[nextWord];
-    lineCount++;
-    i++;
-  }
-  //log('time',new Date() - timer);
-  //if (i==ii) output += '= '+ii+'<br/>';
-  output = util.capitalize(output);
-  return output;
-};
-var buildOutput = function(opt) {
-  var out = '';
-  for (s=0;s<opt.stanzas;s++){
-    // noprotect
-    out += '<p>' + (
-        lex.cfg.optimize ? 
-          (getBestScore(opt.lines, opt.count, lex.cfg.topThreshold)) :
-          (generateLines(opt.lines, opt.count))
-      ) + '</p>';
-  }
-  return out;
-};
 var printOutput = function(arr) {
   var out = '';
   arr = lex.sortArr(arr);
@@ -85,7 +39,7 @@ var getAjax = function(){
     dataType: 'jsonp',
     success: function(data){
       $.each(data.statuses,function(k,v){
-        //console.log(v.text);
+        console.log(v.text);
         lex.build(v.text);
       });
     }
@@ -93,14 +47,21 @@ var getAjax = function(){
 };
 
 $(document).ready(function(){
-
+ 
+ var composition = {stanzas: 3, lines: 4, minWords: 8, maxWords: 10},
+    $input = $('#input'),
+    $out = $('#output'),
+    $dump = $('<div id="dump"/>').appendTo('body'),
+    log = function(k, v){console.log(k+':',v);},
+    dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
+  
   util.buildControls($('#configs'), composition, function(composition){
-    $out.html(buildOutput(composition));
+    $out.html(lex.output.format(composition));
   });
 
   $refresh = $('<button/>').html('Refresh').appendTo('#configs'),
   $refresh.click(function(){
-    $out.html(buildOutput(composition));
+    $out.html(lex.output.format(composition));
   });
 
   $input.bind('input propertychange', function(e){
