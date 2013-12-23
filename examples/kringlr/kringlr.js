@@ -24,14 +24,6 @@ var getBestScore = function(lines, wordsPerLine, scoreMin){
   }
   return getScore(best.txt, true)+' / '+k+' tries / '+ best.txt.length+' chars';
 };
-var printOutput = function(arr) {
-  var out = '';
-  arr = lex.sortArr(arr);
-  $.each(arr, function(k,v){
-    out += '<p>'+getScore(v, true)+'</p>';
-  });
-  return out;
-};
 var getAjax = function(){ 
   $.ajax({
     url: 'http://twndr.com:5000',
@@ -48,16 +40,20 @@ var getAjax = function(){
 
 $(document).ready(function(){
  
- var composition = {stanzas: 3, lines: 4, minWords: 7, maxWords: 8, stats: false},
+ var composition = {
+      sets: 3, 
+      lines: 4, 
+      minWords: 7, 
+      maxWords: 10,
+      lineEnd: '<br>',
+      stats: false
+    },
     $input = $('#input'),
-    $out = $('#output'),
-    $dump = $('<div id="dump"/>').appendTo('body'),
-    log = function(k, v){console.log(k+':',v);},
-    dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
+    $output = $('#output');
   
   $refresh = $('<button/>').html('Refresh').click(function(){
     var composition = util.getConfigs();
-    $out.html(lex.output.format(composition));
+    $output.html(lex.output.format(composition));
   });
 
   util.buildConfigs(composition, function(){ 
@@ -68,8 +64,8 @@ $(document).ready(function(){
 
   $input.bind('input propertychange', function(e){
     lex.build($(this).val(), function(lex){
-      log('meta', lex.meta);
-      dump(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
+      console.log('meta', lex.meta);
+      console.log(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
       $refresh.click();
     });
   });

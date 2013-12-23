@@ -33,7 +33,7 @@ div, textarea, input {
   background: white;
 }
 #configs input[type=text] {
-  width: 20px;
+  width: 40px;
   margin: 0 4px;
   text-align: center;
 }
