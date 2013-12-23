@@ -41,8 +41,8 @@ var getAjax = function(){
 $(document).ready(function(){
  
  var composition = {
-      sets: 3, 
-      lines: 4, 
+      sets: 12, 
+      lines: 1, 
       minWords: 7, 
       maxWords: 10,
       lineEnd: '<br>',
@@ -68,10 +68,6 @@ $(document).ready(function(){
       console.log(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
       $refresh.click();
     });
-  });
-
-  $.get('christmas-songs.txt', function(data) {
-    $input.text(data).trigger('input');
   });
     
 });   
