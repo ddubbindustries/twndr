@@ -1,24 +1,41 @@
 body {
   font: 12px sans-serif;
   padding: 10px;
+  background: darkGreen;
+}
+h1 {
+  color: white;
+  font-size: 3em;
+}
+h2, #configs {
+  display: inline-block;
+  color: white;
+  text-transform: uppercase;
+}
+div, textarea, input {
+  border-radius: 5px;
 }
 #input {
-  height: 50px;
+  height: 100px;
   width: 100%;
+  padding: 20px;
+  border: none;
+  display: block;
+  box-sizing: border-box;
 }
 #output {
-  border: lightGreen 1px solid;
+  background: white;
   font: 14px 'Georgia';
-  padding: 0 20px;
-  margin: 20px 0;
+  padding: 1px 20px;
+  margin-bottom: 20px;
 }
 #dump {
   margin: 20px 0;
   white-space: pre;
-  height: 400px;
+  height: 100px;
   overflow: hidden;
   overflow-y: scroll;
-  border: solid 1px #ccc
+  background: white;
 }
 #configs input {
   width: 20px;
