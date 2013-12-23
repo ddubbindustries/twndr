@@ -48,7 +48,7 @@ var getAjax = function(){
 
 $(document).ready(function(){
  
- var composition = {stanzas: 3, lines: 4, minWords: 7, maxWords: 8, stats: true},
+ var composition = {stanzas: 3, lines: 4, minWords: 7, maxWords: 8, stats: false},
     $input = $('#input'),
     $out = $('#output'),
     $dump = $('<div id="dump"/>').appendTo('body'),
@@ -56,11 +56,11 @@ $(document).ready(function(){
     dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
   
   $refresh = $('<button/>').html('Refresh').click(function(){
-    var composition = util.getControlObj($('#configs'));
+    var composition = util.getConfigs();
     $out.html(lex.output.format(composition));
   });
 
-  util.buildControls($('#configs'), composition, function(){ 
+  util.buildConfigs(composition, function(){ 
     $refresh.click();
   });
   

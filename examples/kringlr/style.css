@@ -29,7 +29,7 @@ div, textarea, input {
   white-space: pre;
   height: 100px;
   overflow: hidden;
-  overflow-y: scroll;
+  overflow: scroll;
   background: white;
 }
 #configs input[type=text] {
