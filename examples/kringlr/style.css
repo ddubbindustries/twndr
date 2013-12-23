@@ -32,10 +32,14 @@ div, textarea, input {
   overflow-y: scroll;
   background: white;
 }
-#configs input {
+#configs input[type=text] {
   width: 20px;
   margin: 0 4px;
   text-align: center;
+}
+.stats {
+  font: 10px sans-serif;
+  color: #999;
 }
 .hilight {
   font-weight: bold;

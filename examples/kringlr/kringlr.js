@@ -48,21 +48,23 @@ var getAjax = function(){
 
 $(document).ready(function(){
  
- var composition = {stanzas: 3, lines: 4, minWords: 8, maxWords: 10},
+ var composition = {stanzas: 3, lines: 4, minWords: 7, maxWords: 8, stats: true},
     $input = $('#input'),
     $out = $('#output'),
     $dump = $('<div id="dump"/>').appendTo('body'),
     log = function(k, v){console.log(k+':',v);},
     dump = function(obj){$dump.append(JSON.stringify(obj,null,'\t'));};
   
-  util.buildControls($('#configs'), composition, function(composition){
+  $refresh = $('<button/>').html('Refresh').click(function(){
+    var composition = util.getControlObj($('#configs'));
     $out.html(lex.output.format(composition));
   });
 
-  $refresh = $('<button/>').html('Refresh').appendTo('#configs'),
-  $refresh.click(function(){
-    $out.html(lex.output.format(composition));
+  util.buildControls($('#configs'), composition, function(){ 
+    $refresh.click();
   });
+  
+  $refresh.appendTo('#configs');
 
   $input.bind('input propertychange', function(e){
     lex.build($(this).val(), function(lex){
