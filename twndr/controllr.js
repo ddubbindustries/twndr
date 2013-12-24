@@ -24,27 +24,15 @@ var getBestScore = function(lines, wordsPerLine, scoreMin){
   }
   return getScore(best.txt, true)+' / '+k+' tries / '+ best.txt.length+' chars';
 };
-var getAjax = function(){ 
-  $.ajax({
-    url: 'http://twndr.com:5000',
-    data: {count: 100, geocode: '37.22,-80.42,15mi', lang: 'en'},
-    dataType: 'jsonp',
-    success: function(data){
-      $.each(data.statuses,function(k,v){
-        console.log(v.text);
-        lex.build(v.text);
-      });
-    }
-  });
-};
+
 
 $(document).ready(function(){
  
  var composition = {
       sets: 12, 
       lines: 1, 
-      minWords: 7, 
-      maxWords: 10,
+      minWords: 17, 
+      maxWords: 20,
       lineEnd: '<br>',
       stats: false
     },
@@ -52,7 +40,7 @@ $(document).ready(function(){
     $output = $('#output');
   
   $refresh = $('<button/>').html('Refresh').click(function(){
-    var composition = util.getConfigs();
+    var composition = util.getConfigs(); 
     $output.html(lex.output.format(composition));
   });
 
@@ -62,12 +50,24 @@ $(document).ready(function(){
   
   $refresh.appendTo('#configs');
 
-  $input.bind('input propertychange', function(e){
-    lex.build($(this).val(), function(lex){
-      console.log('meta', lex.meta);
-      console.log(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
+  // data: {count: 100, geocode: '37.22,-80.42,15mi', lang: 'en'},
+  lex.init();
+  
+  $.ajax({
+    url: 'http://p.ddubb.net/db/', 
+    data: {table: 'tweets', limit: 500},
+    dataType: 'jsonp',
+    success: function(data){
+      $.each(data.results, function(k,v){
+        var chunk = JSON.parse(v.data);
+        $input.append(chunk.created_at + ': ' + chunk.text+"\n\n");
+        lex.addChunk(chunk.text);
+      });
+      lex.sortTop();
+      console.log('meta', Object.keys(lex.list).length, lex.meta);
+      dump(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
       $refresh.click();
-    });
+    }
   });
     
 });   

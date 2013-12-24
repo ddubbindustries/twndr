@@ -1,36 +1,24 @@
 body {
   font: 12px sans-serif;
   padding: 10px;
-  background: darkGreen;
 }
-h1, h2, #configs {
-  color: white;
-}
-div, textarea, input {
-  border: none;
-  border-radius: 5px;
+.col {
+  width: 30%;
+  float: left;
+  border: solid 1px #ddd;
 }
 #input {
-  height: 100px;
-  width: 100%;
   padding: 20px;
-  border: none;
+  height: 400px;
   display: block;
   box-sizing: border-box;
 }
 #output {
-  background: white;
   font: 14px 'Georgia';
   padding: 1px 20px;
-  margin-bottom: 20px;
 }
 #dump {
-  margin: 20px 0;
   white-space: pre;
-  height: 100px;
-  overflow: hidden;
-  overflow: scroll;
-  background: white;
 }
 #configs input[type=text] {
   width: 40px;
