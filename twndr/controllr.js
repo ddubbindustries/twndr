@@ -28,23 +28,27 @@ var getBestScore = function(lines, wordsPerLine, scoreMin){
 
 $(document).ready(function(){
  
- var composition = {
-      sets: 12, 
+ var cfg = {
+      sets: 5, 
       lines: 1, 
-      minWords: 17, 
+      minWords: 2, 
       maxWords: 20,
-      lineEnd: '<br>',
-      stats: false
+      maxChars: 115,
+      minScore: 2,
+      lineEnd: '',
+      stats: true,
+      optimize: true,
+      topCount: 15
     },
     $input = $('#input'),
     $output = $('#output');
   
   $refresh = $('<button/>').html('Refresh').click(function(){
     var composition = util.getConfigs(); 
-    $output.html(lex.output.format(composition));
+    $output.html(lex.output.format(cfg));
   });
 
-  util.buildConfigs(composition, function(){ 
+  util.buildConfigs(cfg, function(){ 
     $refresh.click();
   });
   
@@ -55,16 +59,19 @@ $(document).ready(function(){
   
   $.ajax({
     url: 'http://p.ddubb.net/db/', 
-    data: {table: 'tweets', limit: 500},
+    data: {table: 'tweets', limit: 5000},
     dataType: 'jsonp',
     success: function(data){
+      var input = '';
       $.each(data.results, function(k,v){
         var chunk = JSON.parse(v.data);
-        $input.append(chunk.created_at + ': ' + chunk.text+"\n\n");
+        if (chunk.retweet_count > 0) return true;
+        //input += (chunk.created_at + ': ' + chunk.text+"\n\n");
         lex.addChunk(chunk.text);
       });
-      lex.sortTop();
-      console.log('meta', Object.keys(lex.list).length, lex.meta);
+      //$input.append(input);
+      lex.sortTop(cfg.topCount);
+      console.log('meta', lex.meta);
       dump(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
       $refresh.click();
     }
