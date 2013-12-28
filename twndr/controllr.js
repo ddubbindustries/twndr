@@ -35,7 +35,7 @@ var go = {
       var cfg = util.getConfigs();
       lex.afterChunks(cfg.topCount);
       console.log('meta', lex.meta);
-      dump(lex.meta.top.map(function(v){return v.word+' '+v.count;}));
+      dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
       $output.html(lex.output.format(cfg));
     });
 
