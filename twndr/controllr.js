@@ -8,7 +8,7 @@ var cfg = util.local.get('cfg') || {
     maxChars: 115,
     maxTries: 100,
     maxTime: 2000,
-    maxChunks: 20,
+    maxChunks: 20000,
     timeStart: "Tue Aug 13 22:24:22 +0000 2013",
     timeEnd: "Fri Aug 16 13:18:44 +0000 2013",
     lineEnd: '',
@@ -79,7 +79,7 @@ var go = {
   getApi: function(startTime) {
     $.ajax({
       url: 'http://p.ddubb.net/db/', 
-      data: {table: 'tweets', time: startTime+',', limit: 3000},
+      data: {table: 'tweets', time: startTime+',', limit: 5000},
       dataType: 'jsonp',
       cache: true,
       success: function(data){
@@ -99,6 +99,7 @@ var go = {
         util.local.store('chunks', lex.chunks);
         
         $refresh.click();
+        console.log('this chunk set', go.meta);
         if (lex.meta.chunkCount < cfg.maxChunks) {
           go.getApi(nextTime);
         } else {
