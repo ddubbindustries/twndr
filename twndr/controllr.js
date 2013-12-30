@@ -1,5 +1,3 @@
-  // data: {count: 100, geocode: '37.22,-80.42,15mi', lang: 'en'},
- 
 var cfg = util.local.get('cfg') || {
     sets: 5, 
     lines: 1, 
@@ -8,10 +6,10 @@ var cfg = util.local.get('cfg') || {
     maxChars: 115,
     maxTries: 100,
     maxTime: 2000,
+    lineEnd: '',
     maxChunks: 20000,
     timeStart: "Tue Aug 13 22:24:22 +0000 2013",
     timeEnd: "Fri Aug 16 13:18:44 +0000 2013",
-    lineEnd: '',
     stats: true,
     optimize: true,
     topCount: 15
@@ -128,6 +126,4 @@ var go = {
 };
 $(document).ready(function(){
   go.init();
-});   
-
-
+});
