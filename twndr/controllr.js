@@ -20,26 +20,15 @@ var cfg = util.local.get('cfg') || {
 
 var go = {
   init: function(){
-    cfg = util.getConfigs() || cfg;
-    
-    go.meta = {};
+    cfg = util.getConfigs() || cfg; 
+    go.meta = {duplicates:0, retweets:0, replies: 0, outOfTimeRange: 0, outOfTimeArr: []};
     
     lex.init();
   
     $input = $('#input');
     $output = $('#output');
-    
-    $refresh = $('<button/>').html('Refresh').click(function(){
-      var cfg = util.getConfigs();
-      lex.afterChunks(cfg.topCount);
-      console.log('meta', lex.meta);
-      dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
-      $output.html(lex.output.format(cfg));
-    });
-
-    $rebuild = $('<button/>').html('Rebuild').click(function(){
-      go.init();
-    });
+    $refresh = $('<button/>').html('Refresh').click(go.refresh);
+    $rebuild = $('<button/>').html('Rebuild').click(go.init);
 
     util.buildConfigs(cfg, function(){
       util.local.store('cfg', util.getConfigs()); 
@@ -55,8 +44,16 @@ var go = {
     }
     go.getStream(cfg.updateInterval);
   },
+  refresh: function(){
+    var cfg = util.getConfigs();
+    lex.afterChunks(cfg.topCount);
+    console.log('meta', lex.meta, go.meta);
+    dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
+    $output.html(lex.output.format(cfg));
+  },
   getStream: function(seconds){
     console.log('starting stream at '+seconds+'s interval');
+    if (go.activeInterval) clearInterval(go.activeInterval);
     go.activeInterval = setInterval(go.getChunks, seconds * 1000);
   },
   getChunks: function(){
@@ -67,14 +64,19 @@ var go = {
       go.finalize();
     }
   },
+  processChunk: function(chunk){
+    lex.chunks[chunk.id_str] = chunk;
+    lex.addChunk(chunk.text);
+    return (chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name + "\n\n");
+  },
   isBadChunk: function(chunk){
     if (lex.chunks[chunk.id_str]) return go.meta.duplicates++;
     if (chunk.retweet_count > 0) return go.meta.retweets++;
     if (chunk.in_reply_to_user_id_str) return go.meta.replies++;
-    if (!go.isInTimeRange(chunk.created_at, cfg.timeStart, cfg.timeEnd)) {
+    /*if (!go.isInTimeRange(chunk.created_at, cfg.timeStart, cfg.timeEnd)) {
       go.meta.outOfTimeArr.push(chunk);
       return go.meta.outOfTimeRange++;
-    }
+    }*/
     return false;
   },
   isInTimeRange: function(time, low, high){
@@ -88,24 +90,16 @@ var go = {
       success: function(data){
         var input = '';
         $.each(data, function(k, chunk){
-          //if (go.isBadChunk(chunk)) return true;
-
-          chunk = util.simplifyTweetObj(chunk);
-
-          input += (chunk.created_at + ': ' + chunk.text+"\n\n");
-          lex.chunks[chunk.id_str] = chunk;
-          lex.addChunk(chunk.text);
+          if (go.isBadChunk(chunk)) return true;
+          chunk = util.simplifyTweetObj(chunk); 
+          input += go.processChunk(chunk);
         });
-        $input.append(input+"====================\n\n\n");
-        util.local.store('chunks', lex.chunks);
+        $input.prepend(input+"====================\n\n");
         
+        util.local.store('chunks', lex.chunks);
         $refresh.click();
       }
     });
-  },
-  getDbChunks: function(){
-    go.meta = {duplicates:0, retweets:0, replies: 0, outOfTimeRange: 0, outOfTimeArr: []};
-    go.getApi();
   },
   getDbApi: function(startTime) {
     $.ajax({
@@ -130,7 +124,6 @@ var go = {
         util.local.store('chunks', lex.chunks);
         
         $refresh.click();
-        console.log('this chunk set', go.meta);
         if (lex.meta.chunkCount < cfg.maxChunks) {
           go.getApi(nextTime);
         } else {
@@ -144,17 +137,14 @@ var go = {
     var chunks = util.local.get('chunks');
     $.each(chunks, function(k, chunk){
       if (++count > cfg.maxChunks) return false;
-      //if (go.isBadChunk(chunk)) return true;
-      lex.chunks[chunk.id_str] = chunk;
-      lex.addChunk(chunk.text);
-      input += (chunk.created_at + ': ' + chunk.text+"\n\n");
+      if (go.isBadChunk(chunk)) return true;
+      input += go.processChunk(chunk);
     });
-    $input.append(input);
+    $input.prepend(input);
     $refresh.click();
-    go.finalize();
   },
   finalize: function(){
-    console.log('done getting chunks');
+    console.log('finalized');
   }
 };
 $(document).ready(go.init);
