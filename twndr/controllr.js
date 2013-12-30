@@ -83,7 +83,12 @@ var go = {
   processNewChunk: function(chunk){
     lex.chunks[chunk.id_str] = chunk;
     lex.addChunk(chunk.text);
-    return (chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name + "\n\n");
+    //return ('<p>'+chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name + '</p>');
+    return $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
+      .data(chunk)
+      .click(function(){
+        console.log('data', $(this).data());
+      });
   },
   isBadChunk: function(chunk){
     if (lex.chunks[chunk.id_str]) return go.meta.duplicates++;
@@ -101,14 +106,14 @@ var go = {
       url: 'http://p.ddubb.net:8080', 
       dataType: 'jsonp',
       success: function(data){
-        var input = '', count = 0;
+        var $temp = $('<div/>'), count = 0;
         $.each(data, function(k, chunk){
           count++;
           if (go.isBadChunk(chunk)) return true;
           chunk = util.simplifyTweetObj(chunk); 
-          input += go.processNewChunk(chunk);
+          $temp.append(go.processNewChunk(chunk));
         });
-        $input.prepend(input+"====================\n\n");
+        $input.append($temp);
         
         util.local.store('chunks', lex.chunks);
         go.meta.source = 'stream';
@@ -149,14 +154,18 @@ var go = {
     });
   },
   getStored: function(){
-    var input = '', count = 0;
+    console.time('build');
+    var temp='', $temp = $('<div/>'), count = 0;
     var chunks = util.local.get('chunks');
     $.each(chunks, function(k, chunk){
       if (++count > cfg.maxChunks) return false;
       if (go.isBadChunk(chunk)) return true;
-      input += go.processNewChunk(chunk);
+      //temp += go.processNewChunk(chunk);
+      $temp.append(go.processNewChunk(chunk));
     });
-    $input.prepend(input);
+    //$input.prepend(temp);
+    $input.prepend($temp);
+    console.timeEnd('build');
     go.meta.source = 'localStore';
     go.meta.count = count;
     $refresh.click();
