@@ -41,7 +41,8 @@ http.createServer(function(req, res) {
   console.log(new Date().toISOString(), req.url);
   
   var out = JSON.stringify(tweets);
-	res.end(params.callback ? params.callback + '(' + out + ');' : out);
+  res.writeHead(200, {"Content-Type": "application/json"});	
+  res.end(params.callback ? params.callback + '(' + out + ');' : out);
 	tweets = [];
 
 }).listen(port);

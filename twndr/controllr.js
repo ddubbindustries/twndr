@@ -7,19 +7,19 @@ var cfg = util.local.get('cfg') || {
     maxTries: 100,
     maxTime: 2000,
     lineEnd: '',
-    maxChunks: 20000,
-    timeStart: "Tue Aug 13 22:24:22 +0000 2013",
-    timeEnd: "Fri Aug 16 13:18:44 +0000 2013",
+    maxChunks: 2000,
+    updateInterval: 60,
+    timeStart: 'Tue Aug 13 22:24:22 +0000 2013',
+    timeEnd: 'Fri Aug 16 13:18:44 +0000 2013',
     stats: true,
     optimize: true,
-    topCount: 15
+    topCount: 20
   },
   $input,
   $output;
 
 var go = {
   init: function(){
-
     cfg = util.getConfigs() || cfg;
     
     go.meta = {};
@@ -47,17 +47,24 @@ var go = {
     });
     
     $('#configs').append($refresh, $rebuild);
-
-    go.getChunks();
-
-  },
-  getChunks: function(){
-    go.meta = {duplicates:0, retweets:0, replies: 0, outOfTimeRange: 0, outOfTimeArr: []};
-
+    
     if (util.local.get('chunks')) {
       go.getStored();
     } else {
+      go.getChunks();
+    }
+    go.getStream(cfg.updateInterval);
+  },
+  getStream: function(seconds){
+    console.log('starting stream at '+seconds+'s interval');
+    go.activeInterval = setInterval(go.getChunks, seconds * 1000);
+  },
+  getChunks: function(){
+    if (lex.meta.chunkCount < cfg.maxChunks) {
       go.getApi();
+    } else {
+      clearInterval(go.activeInterval);
+      go.finalize();
     }
   },
   isBadChunk: function(chunk){
@@ -74,7 +81,33 @@ var go = {
     var t = new Date(time);
     return t >= new Date(low) && t <= new Date(high);
   },
-  getApi: function(startTime) {
+  getApi: function(cfg) {
+    $.ajax({
+      url: 'http://p.ddubb.net:8080', 
+      dataType: 'jsonp',
+      success: function(data){
+        var input = '';
+        $.each(data, function(k, chunk){
+          //if (go.isBadChunk(chunk)) return true;
+
+          chunk = util.simplifyTweetObj(chunk);
+
+          input += (chunk.created_at + ': ' + chunk.text+"\n\n");
+          lex.chunks[chunk.id_str] = chunk;
+          lex.addChunk(chunk.text);
+        });
+        $input.append(input+"====================\n\n\n");
+        util.local.store('chunks', lex.chunks);
+        
+        $refresh.click();
+      }
+    });
+  },
+  getDbChunks: function(){
+    go.meta = {duplicates:0, retweets:0, replies: 0, outOfTimeRange: 0, outOfTimeArr: []};
+    go.getApi();
+  },
+  getDbApi: function(startTime) {
     $.ajax({
       url: 'http://p.ddubb.net/db/', 
       data: {table: 'tweets', time: startTime+',', limit: 5000},
@@ -111,7 +144,7 @@ var go = {
     var chunks = util.local.get('chunks');
     $.each(chunks, function(k, chunk){
       if (++count > cfg.maxChunks) return false;
-      if (go.isBadChunk(chunk)) return true;
+      //if (go.isBadChunk(chunk)) return true;
       lex.chunks[chunk.id_str] = chunk;
       lex.addChunk(chunk.text);
       input += (chunk.created_at + ': ' + chunk.text+"\n\n");
@@ -121,9 +154,7 @@ var go = {
     go.finalize();
   },
   finalize: function(){
-    console.log('got all chunks', go.meta);
+    console.log('done getting chunks');
   }
 };
-$(document).ready(function(){
-  go.init();
-});
+$(document).ready(go.init);
