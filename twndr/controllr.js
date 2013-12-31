@@ -21,27 +21,14 @@ var cfg = util.local.get('cfg') || {
   $output;
 
 var go = {
-  init: function(){
+  init: function(hooks){
+    go.hooks = hooks || {init:function(){}, refresh:function(){}};
     cfg = util.getConfigs() || cfg; 
     go.meta = {source: '', count: 0, dupes:0, retweets:0, replies: 0};
     
     lex.init();
-  
-    $input = $('#input');
-    $output = $('#output');
-    $refresh = $('<button/>').html('Refresh').click(go.refresh);
-    $rebuild = $('<button/>').html('Rebuild').click(go.init);
-    $stop = $('<button/>').html('Stop').click(go.stopStream);
-    $start = $('<button/>').html('Start').click(go.startStream);
-    $filter = $('<button/>').html('Filter').click(go.filterChunks);
+    go.hooks.init();
 
-    util.buildConfigs(cfg, function(){
-      util.local.store('cfg', util.getConfigs()); 
-      $refresh.click();
-    });
-    
-    $('#configs').append($refresh, $rebuild, $stop, $start);
-    
     if (util.local.get('chunks')) go.getStored(); 
     if (cfg.stream) go.startStream(cfg.streamInterval);
   },
@@ -49,8 +36,7 @@ var go = {
     var cfg = util.getConfigs();
     lex.afterChunks(cfg.topCount);
     console.log('meta', lex.meta, "\nlatest", go.meta);
-    dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
-    $output.html(lex.output.format(cfg));
+    go.hooks.refresh();
   },
   startStream: function(){
     var seconds = cfg.streamInterval;
@@ -76,19 +62,15 @@ var go = {
     lex.init();
     $.each(cachedChunks, function(k,chunk){
       if (go.isInTimeRange(chunk.created_at, cfg.timeStart, cfg.timeEnd)) {
-        go.processNewChunk(chunk);
+        go.process(chunk);
       }
     });
+    go.refresh();
   },
-  processNewChunk: function(chunk){
+  process: function(chunk){
     lex.chunks[chunk.id_str] = chunk;
     lex.addChunk(chunk.text);
-    //return ('<p>'+chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name + '</p>');
-    return $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
-      .data(chunk)
-      .click(function(){
-        console.log('data', $(this).data());
-      });
+    go.hooks.process(chunk);
   },
   isBadChunk: function(chunk){
     if (lex.chunks[chunk.id_str]) return go.meta.duplicates++;
@@ -106,19 +88,17 @@ var go = {
       url: 'http://p.ddubb.net:8080', 
       dataType: 'jsonp',
       success: function(data){
-        var $temp = $('<div/>'), count = 0;
+        var count = 0;
         $.each(data, function(k, chunk){
           count++;
           if (go.isBadChunk(chunk)) return true;
           chunk = util.simplifyTweetObj(chunk); 
-          $temp.append(go.processNewChunk(chunk));
-        });
-        $input.append($temp);
-        
+          go.process(chunk);
+        }); 
         util.local.store('chunks', lex.chunks);
         go.meta.source = 'stream';
         go.meta.count = count;
-        $refresh.click();
+        go.refresh();
       }
     });
   },
@@ -144,7 +124,7 @@ var go = {
         $input.append(input+"====================\n\n\n");
         util.local.store('chunks', lex.chunks);
         
-        $refresh.click();
+        go.refresh();
         if (lex.meta.chunkCount < cfg.maxChunks) {
           go.getApi(nextTime);
         } else {
@@ -155,23 +135,54 @@ var go = {
   },
   getStored: function(){
     console.time('build');
-    var temp='', $temp = $('<div/>'), count = 0;
+    var count = 0;
     var chunks = util.local.get('chunks');
     $.each(chunks, function(k, chunk){
       if (++count > cfg.maxChunks) return false;
       if (go.isBadChunk(chunk)) return true;
-      //temp += go.processNewChunk(chunk);
-      $temp.append(go.processNewChunk(chunk));
+      go.process(chunk);
     });
-    //$input.prepend(temp);
-    $input.prepend($temp);
     console.timeEnd('build');
     go.meta.source = 'localStore';
     go.meta.count = count;
-    $refresh.click();
+    go.refresh();
   },
   finalize: function(){
     console.log('finalized');
   }
 };
-$(document).ready(go.init);
+
+var hooks = {
+  init: function(){
+    $input = $('#input');
+    $output = $('#output');
+    $refresh = $('<button/>').html('Refresh').click(go.refresh);
+    $rebuild = $('<button/>').html('Rebuild').click(go.init);
+    $stop = $('<button/>').html('Stop').click(go.stopStream);
+    $start = $('<button/>').html('Start').click(go.startStream);
+    $filter = $('<button/>').html('Filter').click(go.filterChunks);
+
+    util.buildConfigs(cfg, function(){
+      util.local.store('cfg', util.getConfigs()); 
+      go.refresh();
+    });
+    
+    $('#configs').append($refresh, $rebuild, $stop, $start, $filter);
+  },
+  process: function(chunk){
+    var $p = $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
+      .data(chunk)
+      .click(function(){
+        console.log('data', $(this).data());
+      });
+    $input.prepend($p);
+  },
+  refresh: function(){ 
+    dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
+    $output.html(lex.output.format(cfg));
+  }
+};
+
+$(document).ready(function(){
+  go.init(hooks);
+});
