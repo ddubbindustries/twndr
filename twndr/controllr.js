@@ -4,29 +4,8 @@ if (typeof(window) == 'undefined') {
   localStorage = new LocalStorage('./localStore');
   util = require('../lib/util.js').util;
   lex = require('../lib/lexr.js').lex;
+  cfg = require('./cfg.js').cfg;
 }
- 
-var cfg = util.local.get('cfg') || {
-    sets: 1, 
-    lines: 1, 
-    minWords: 2, 
-    maxWords: 20,
-    maxChars: 115,
-    maxTries: 100,
-    maxTime: 2000,
-    lineEnd: '',
-    topCount: 20,
-    stats: false,
-    optimize: true,
-    
-    maxChunks: 5000,
-    timeStart: 'Tue Aug 13 22:24:22 +0000 2013',
-    timeEnd: 'Fri Aug 16 13:18:44 +0000 2013',
-    stream: true,
-    streamInterval: 30
-  },
-  $input,
-  $output;
 
 var go = {
   init: function(hooks){
@@ -47,9 +26,9 @@ var go = {
   },
   startStream: function(){
     var seconds = cfg.streamInterval;
-    console.log('starting stream at '+seconds+'s interval');
     go.getChunks();
     if (go.activeInterval) go.stopStream();
+    console.log('starting stream at '+seconds+'s interval');
     go.activeInterval = setInterval(go.getChunks, seconds * 1000);
   },
   stopStream: function(){
@@ -159,63 +138,4 @@ var go = {
   }
 };
 
-var run = {
-  client: function() {
-    var hooks = {
-      init: function(){
-        console.log('client init');
-        $input = $('#input');
-        $output = $('#output');
-        $refresh = $('<button/>').html('Refresh').click(go.refresh);
-        $rebuild = $('<button/>').html('Rebuild').click(go.init);
-        $stop = $('<button/>').html('Stop').click(go.stopStream);
-        $start = $('<button/>').html('Start').click(go.startStream);
-        $filter = $('<button/>').html('Filter').click(go.filterChunks);
-
-        util.buildConfigs(cfg, function(){
-          util.local.store('cfg', util.getConfigs()); 
-          go.refresh();
-        });
-        
-        $('#configs').append($refresh, $rebuild, $stop, $start, $filter);
-      },
-      process: function(chunk){
-        var $p = $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
-          .data(chunk)
-          .click(function(){
-            console.log('data', $(this).data());
-          });
-        $input.prepend($p);
-      },
-      refresh: function(){ 
-        console.log('meta', lex.meta, "\nlatest", go.meta);
-        dump(lex.meta.topArr);
-        $output.html(lex.output.format(cfg));
-      }
-    };
-
-    $(document).ready(function(){
-      go.init(hooks);
-    });
-  },
-  server: function(){
-    go.init({
-      init: function(){
-        console.log('server init', cfg);
-      },
-      process: function(chunks){},
-      refresh: function(){ 
-        console.log('chunkCount', lex.meta.chunkCount, 'tallyCount', lex.meta.tallyCount, "\nlatest", go.meta);
-        console.log('top:', lex.meta.topArr.slice(0, cfg.topCount).join(', '));
-        console.log('twip:', lex.output.format(cfg));
-      },
-      finalize: function(){}
-    });
-  }
-};
-
-if (typeof(window) == 'undefined') {
-  run.server();
-} else {
-  run.client();
-}
+if (typeof exports !== 'undefined') exports.go = go;

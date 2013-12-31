@@ -1,0 +1,22 @@
+var cfg = {
+  sets: 1, 
+  lines: 1, 
+  minWords: 2, 
+  maxWords: 20,
+  maxChars: 115,
+  maxTries: 100,
+  maxTime: 2000,
+  lineEnd: '',
+  topCount: 20,
+  stats: false,
+  optimize: true,
+  
+  maxChunks: 2000,
+  timeStart: 'Tue Aug 13 22:24:22 +0000 2013',
+  timeEnd: 'Fri Aug 16 13:18:44 +0000 2013',
+  stream: true,
+  streamInterval: 30
+};
+
+if (typeof exports !== 'undefined') exports.cfg = cfg;
+
