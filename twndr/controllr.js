@@ -1,6 +1,10 @@
-if (typeof($) == 'undefined') $ = require('./streamr/node_modules/jquery');
-if (typeof(util) == 'undefined') util = require('../lib/util.js').util;
-if (typeof(lex) == 'undefined') lex = require('../lib/lexr.js').lex;
+if (typeof(window) == 'undefined') {
+  $ = require('./streamr/node_modules/jquery');
+  LocalStorage = require('./streamr/node_modules/node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./localStore');
+  util = require('../lib/util.js').util;
+  lex = require('../lib/lexr.js').lex;
+}
  
 var cfg = util.local.get('cfg') || {
     sets: 1, 
@@ -26,7 +30,7 @@ var cfg = util.local.get('cfg') || {
 
 var go = {
   init: function(hooks){
-    go.hooks = hooks;
+    go.hooks = go.hooks || hooks;
     cfg = util.getConfigs() || cfg; 
     go.meta = {source:'', count:0, dupes:0, retweets:0, replies: 0};
     
@@ -185,7 +189,7 @@ var run = {
       },
       refresh: function(){ 
         console.log('meta', lex.meta, "\nlatest", go.meta);
-        dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
+        dump(lex.meta.topArr);
         $output.html(lex.output.format(cfg));
       }
     };
@@ -202,7 +206,7 @@ var run = {
       process: function(chunks){},
       refresh: function(){ 
         console.log('chunkCount', lex.meta.chunkCount, 'tallyCount', lex.meta.tallyCount, "\nlatest", go.meta);
-        console.log('top:', lex.meta.getTopArr().join(', '));
+        console.log('top:', lex.meta.topArr.slice(0, cfg.topCount).join(', '));
         console.log('twip:', lex.output.format(cfg));
       },
       finalize: function(){}
