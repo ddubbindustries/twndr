@@ -1,5 +1,9 @@
+if (typeof($) == 'undefined') $ = require('./streamr/node_modules/jquery');
+if (typeof(util) == 'undefined') util = require('../lib/util.js').util;
+if (typeof(lex) == 'undefined') lex = require('../lib/lexr.js').lex;
+ 
 var cfg = util.local.get('cfg') || {
-    sets: 5, 
+    sets: 1, 
     lines: 1, 
     minWords: 2, 
     maxWords: 20,
@@ -8,13 +12,13 @@ var cfg = util.local.get('cfg') || {
     maxTime: 2000,
     lineEnd: '',
     topCount: 20,
-    stats: true,
+    stats: false,
     optimize: true,
     
     maxChunks: 5000,
     timeStart: 'Tue Aug 13 22:24:22 +0000 2013',
     timeEnd: 'Fri Aug 16 13:18:44 +0000 2013',
-    stream: false,
+    stream: true,
     streamInterval: 30
   },
   $input,
@@ -22,9 +26,9 @@ var cfg = util.local.get('cfg') || {
 
 var go = {
   init: function(hooks){
-    go.hooks = hooks || {init:function(){}, refresh:function(){}};
+    go.hooks = hooks;
     cfg = util.getConfigs() || cfg; 
-    go.meta = {source: '', count: 0, dupes:0, retweets:0, replies: 0};
+    go.meta = {source:'', count:0, dupes:0, retweets:0, replies: 0};
     
     lex.init();
     go.hooks.init();
@@ -35,7 +39,6 @@ var go = {
   refresh: function(){
     var cfg = util.getConfigs();
     lex.afterChunks(cfg.topCount);
-    console.log('meta', lex.meta, "\nlatest", go.meta);
     go.hooks.refresh();
   },
   startStream: function(){
@@ -152,37 +155,63 @@ var go = {
   }
 };
 
-var hooks = {
-  init: function(){
-    $input = $('#input');
-    $output = $('#output');
-    $refresh = $('<button/>').html('Refresh').click(go.refresh);
-    $rebuild = $('<button/>').html('Rebuild').click(go.init);
-    $stop = $('<button/>').html('Stop').click(go.stopStream);
-    $start = $('<button/>').html('Start').click(go.startStream);
-    $filter = $('<button/>').html('Filter').click(go.filterChunks);
+var run = {
+  client: function() {
+    var hooks = {
+      init: function(){
+        console.log('client init');
+        $input = $('#input');
+        $output = $('#output');
+        $refresh = $('<button/>').html('Refresh').click(go.refresh);
+        $rebuild = $('<button/>').html('Rebuild').click(go.init);
+        $stop = $('<button/>').html('Stop').click(go.stopStream);
+        $start = $('<button/>').html('Start').click(go.startStream);
+        $filter = $('<button/>').html('Filter').click(go.filterChunks);
 
-    util.buildConfigs(cfg, function(){
-      util.local.store('cfg', util.getConfigs()); 
-      go.refresh();
+        util.buildConfigs(cfg, function(){
+          util.local.store('cfg', util.getConfigs()); 
+          go.refresh();
+        });
+        
+        $('#configs').append($refresh, $rebuild, $stop, $start, $filter);
+      },
+      process: function(chunk){
+        var $p = $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
+          .data(chunk)
+          .click(function(){
+            console.log('data', $(this).data());
+          });
+        $input.prepend($p);
+      },
+      refresh: function(){ 
+        console.log('meta', lex.meta, "\nlatest", go.meta);
+        dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
+        $output.html(lex.output.format(cfg));
+      }
+    };
+
+    $(document).ready(function(){
+      go.init(hooks);
     });
-    
-    $('#configs').append($refresh, $rebuild, $stop, $start, $filter);
   },
-  process: function(chunk){
-    var $p = $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
-      .data(chunk)
-      .click(function(){
-        console.log('data', $(this).data());
-      });
-    $input.prepend($p);
-  },
-  refresh: function(){ 
-    dump(lex.objToArr(lex.meta.top).map(function(v){return v.word+' '+v.count;}));
-    $output.html(lex.output.format(cfg));
+  server: function(){
+    go.init({
+      init: function(){
+        console.log('server init', cfg);
+      },
+      process: function(chunks){},
+      refresh: function(){ 
+        console.log('chunkCount', lex.meta.chunkCount, 'tallyCount', lex.meta.tallyCount, "\nlatest", go.meta);
+        console.log('top:', lex.meta.getTopArr().join(', '));
+        console.log('twip:', lex.output.format(cfg));
+      },
+      finalize: function(){}
+    });
   }
 };
 
-$(document).ready(function(){
-  go.init(hooks);
-});
+if (typeof(window) == 'undefined') {
+  run.server();
+} else {
+  run.client();
+}
