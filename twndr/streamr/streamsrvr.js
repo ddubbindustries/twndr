@@ -35,7 +35,8 @@ getStream({locations: geo._toCSV(geo.reg)}, function(tweet){
 });
 
 http.createServer(function(req, res) {
-	if (req.url.indexOf('/favicon.ico') > -1) return false;
+	
+  if (req.url.indexOf('/favicon.ico') > -1) return false;
   
   var params = url.parse(req.url, true).query;
   console.log(new Date().toISOString(), req.url);
@@ -43,7 +44,7 @@ http.createServer(function(req, res) {
   var out = JSON.stringify(tweets);
   res.writeHead(200, {"Content-Type": "application/json"});	
   res.end(params.callback ? params.callback + '(' + out + ');' : out);
-	tweets = [];
+	tweets = tweets.slice(-200);
 
 }).listen(port);
 

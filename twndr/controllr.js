@@ -39,7 +39,6 @@ var go = {
     if (lex.meta.chunkCount < cfg.maxChunks) {
       go.getApi();
     } else {
-      clearInterval(go.activeInterval);
       go.finalize();
     }
   },
@@ -59,7 +58,7 @@ var go = {
     go.hooks.process(chunk);
   },
   isBadChunk: function(chunk){
-    if (lex.chunks[chunk.id_str]) return go.meta.duplicates++;
+    if (lex.chunks[chunk.id_str]) return go.meta.dupes++;
     if (chunk.retweet_count > 0) return go.meta.retweets++;
     if (chunk.in_reply_to_user_id_str) return go.meta.replies++;
     // if (!go.isInTimeRange(chunk.created_at, cfg.timeStart, cfg.timeEnd)) return go.meta.outOfTimeRange++;
@@ -135,6 +134,8 @@ var go = {
   },
   finalize: function(){
     console.log('finalized');
+    go.stopStream();
+    go.hooks.finalize();
   }
 };
 
