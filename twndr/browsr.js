@@ -28,6 +28,9 @@ var hooks = {
     console.log('meta', lex.meta, "\nlatest", go.meta);
     dump(lex.meta.topArr);
     $output.html(lex.output.format(cfg));
+  },
+  finalize: function(){
+    console.log('final hook');
   }
 };
 
