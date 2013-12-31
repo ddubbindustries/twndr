@@ -13,7 +13,8 @@ go.init({
   },
   process: function(chunks){},
   refresh: function(){ 
-    console.log('chunkCount', lex.meta.chunkCount, 'tallyCount', lex.meta.tallyCount, "\nlatest", go.meta);
+    console.log({refresh: new Date().toISOString(), chunkCount: lex.meta.chunkCount, tallyCount: lex.meta.tallyCount});
+    console.log('chunks:', go.meta);
     console.log('top:', lex.meta.topArr.slice(0, cfg.topCount).join(', '));
     console.log('twip:', lex.output.format(cfg));
   },

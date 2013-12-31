@@ -1,3 +1,10 @@
+$ = require('./node_modules/jquery');
+LocalStorage = require('./node_modules/node-localstorage').LocalStorage;
+localStorage = new LocalStorage('../localStore');
+util = require('../../lib/util.js').util;
+lex = require('../../lib/lexr.js').lex;
+cfg = require('../cfg.js').cfg;
+
 var http = require('http'),
     url = require('url'),
     port = 8080,
@@ -27,11 +34,16 @@ var http = require('http'),
         return [rect.sw.x, rect.sw.y, rect.ne.x, rect.ne.y].join(',');
       }
     },
-    tweets = [];
+    tweetStorage = util.local.get('tweets') || [],
+    tweetBuffer = [];
+
+console.log('tweetStorage', tweetStorage.length);
 
 getStream({locations: geo._toCSV(geo.reg)}, function(tweet){
-  tweets.push(tweet);
-  console.log(tweets.length, tweet.text);
+  tweetBuffer.push(tweet);
+  tweetStorage.push(tweet);
+  util.local.store('tweets', tweetStorage);
+  console.log(tweetBuffer.length, tweet.text);
 });
 
 http.createServer(function(req, res) {
@@ -41,10 +53,10 @@ http.createServer(function(req, res) {
   var params = url.parse(req.url, true).query;
   console.log(new Date().toISOString(), req.url);
   
-  var out = JSON.stringify(tweets);
+  var out = JSON.stringify(tweetBuffer);
   res.writeHead(200, {"Content-Type": "application/json"});	
   res.end(params.callback ? params.callback + '(' + out + ');' : out);
-	tweets = tweets.slice(-200);
+	tweetBuffer = [];
 
 }).listen(port);
 
