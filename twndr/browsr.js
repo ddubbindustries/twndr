@@ -1,6 +1,7 @@
 var hooks = {
   init: function(){
-    console.log('client init');
+    cfg = util.local.get('cfg') || cfg;
+    console.log('client init', cfg);
     $input = $('#input');
     $output = $('#output');
     $refresh = $('<button/>').html('Refresh').click(go.refresh);
@@ -25,6 +26,7 @@ var hooks = {
     $input.prepend($p);
   },
   refresh: function(){ 
+    cfg = util.local.get('cfg') || cfg;
     console.log('meta', lex.meta, "\nlatest", go.meta);
     dump(lex.meta.topArr);
     $output.html(lex.output.format(cfg));
