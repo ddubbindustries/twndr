@@ -48,15 +48,16 @@ getStream({locations: geo._toCSV(geo.reg)}, function(tweet){
 
 http.createServer(function(req, res) {
 	
+  if (req.headers.host !== 'p.ddubb.net:'+port) return false;
   if (req.url.indexOf('/favicon.ico') > -1) return false;
   
   var params = url.parse(req.url, true).query;
   console.log(new Date().toISOString(), req.url);
   
-  var out = JSON.stringify(tweetBuffer);
+  var out = JSON.stringify(params.all ? tweetStorage : tweetBuffer);
   res.writeHead(200, {"Content-Type": "application/json"});	
   res.end(params.callback ? params.callback + '(' + out + ');' : out);
-	tweetBuffer = [];
+	if (params.all) { tweetStorage = []; } else { tweetBuffer = []; }
 
 }).listen(port);
 
