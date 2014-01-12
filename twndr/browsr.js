@@ -18,7 +18,9 @@ var hooks = {
     $('#configs').append($refresh, $rebuild, $stop, $start, $filter);
   },
   process: function(chunk){
-    var $p = $('<p/>').html(chunk.created_at + ': ' + chunk.text + ' | ' + chunk.place.full_name)
+    var out = chunk.created_at + ': ' + chunk.text + ' | ' + 
+      (chunk.place ? chunk.place.full_name : '???');
+    var $p = $('<p/>').html(out)
       .data(chunk)
       .click(function(){
         console.log('data', $(this).data());
@@ -27,6 +29,7 @@ var hooks = {
   },
   refresh: function(){ 
     cfg = util.local.get('cfg') || cfg;
+    console.log('refresh cfg', go.cfg);
     console.log('meta', lex.meta, "\nlatest", go.meta);
     dump(lex.meta.topArr);
     $output.html(lex.output.format(cfg));
