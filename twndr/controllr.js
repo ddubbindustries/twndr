@@ -1,16 +1,16 @@
 if (typeof(window) == 'undefined') {
   $ = require('./streamr/node_modules/jquery');
   LocalStorage = require('./streamr/node_modules/node-localstorage').LocalStorage;
-  localStorage = new LocalStorage('./localStore');
+  localStorage = new LocalStorage('./localStore', 25*1024*1024);
   util = require('../lib/util.js').util;
   lex = require('../lib/lexr.js').lex;
-  cfg = require('./cfg.js').cfg;
+  var cfg = require('./cfg.js').cfg;
 }
 
 var go = {
   init: function(hooks){
     go.hooks = go.hooks || hooks;
-    cfg = util.getConfigs() || cfg; 
+    go.cfg = util.getConfigs() || cfg;
     go.meta = {source:'', count:0, dupes:0, retweets:0, replies: 0};
     
     lex.init();
@@ -20,13 +20,13 @@ var go = {
     if (cfg.stream) go.startStream(cfg.streamInterval);
   },
   refresh: function(){
-    var cfg = util.getConfigs();
-    lex.afterChunks(cfg.topCount);
-    go.hooks.refresh();
+    go.cfg = util.getConfigs() || go.cfg;
+    lex.afterChunks(go.cfg.topCount);
+    go.hooks.refresh(lex);
   },
   startStream: function(){
     var seconds = cfg.streamInterval;
-    go.getChunks();
+    go.getChunks({all: true});
     if (go.activeInterval) go.stopStream();
     console.log('starting stream at '+seconds+'s interval');
     go.activeInterval = setInterval(go.getChunks, seconds * 1000);
@@ -35,9 +35,9 @@ var go = {
     console.log('stopping stream');
     clearInterval(go.activeInterval); 
   },
-  getChunks: function(){
+  getChunks: function(params){
     if (lex.meta.chunkCount < cfg.maxChunks) {
-      go.getApi();
+      go.getApi(params);
     } else {
       go.finalize();
     }
@@ -68,9 +68,10 @@ var go = {
     var t = new Date(time);
     return t >= new Date(low) && t <= new Date(high);
   },
-  getApi: function(cfg) {
+  getApi: function(params) {
     $.ajax({
       url: 'http://p.ddubb.net:8080', 
+      data: params || {},
       dataType: 'jsonp',
       success: function(data){
         var count = 0;
@@ -135,7 +136,7 @@ var go = {
   finalize: function(){
     console.log('finalized');
     go.stopStream();
-    go.hooks.finalize();
+    go.hooks.finalize(lex);
   }
 };
 
