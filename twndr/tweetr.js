@@ -1,4 +1,4 @@
-exports.postTweet = function(text) {
+exports.post = function(text) {
 
 	var https = require('https');
 	var OAuth = require('./streamr/node_modules/oauth/').OAuth;
@@ -32,7 +32,7 @@ exports.postTweet = function(text) {
 			if (error) {
 				console.log('oauth post error:', error);
 			} else {
-				console.log('oauth post success:', data.created_at, data.text);
+				console.log('oauth post success!');
 			}
 		}
 	);
