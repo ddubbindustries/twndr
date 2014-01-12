@@ -1,13 +1,13 @@
 var cfg = {
   sets: 1,
   lines: 1,
-  minWords: 2,
+  minWords: 15,
   maxWords: 25,
   maxChars: 135,
   maxTries: 500,
   maxTime: 2000,
   lineEnd: '',
-  topCount: 20,
+  topCount: 15,
   stats: false,
   optimize: true,
   
