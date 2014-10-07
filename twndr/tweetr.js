@@ -1,21 +1,22 @@
-exports.post = function(text) {
+exports.post = function(text, enviro) {
 
 	var https = require('https');
 	var OAuth = require('./streamr/node_modules/oauth/').OAuth;
-	var keys = require('./streamr/twitter_keys').keys;
+  var enviro = enviro || 'dev';
+  var keys = require('./streamr/twitter_keys')[enviro == 'prod' ? 'keys' : 'dev_keys'];
 	var api = {
 		request_token: 'https://api.twitter.com/oauth/request_token',
 		access_token: 'https://api.twitter.com/oauth/access_token',
 		post:	'https://api.twitter.com/1.1/statuses/update.json',
-		geo:	'http://api.twitter.com/1/geo/reverse_geocode.json'	
+		geo:	'http://api.twitter.com/1/geo/reverse_geocode.json'
 	};
 	var tweeter = new OAuth(
-		api.request_token, 
-		api.access_token, 
-		keys.consumerKey, 
-		keys.consumerSecret, 
-		'1.0A', 
-		null, 
+		api.request_token,
+    api.access_token,
+		keys.consumerKey,
+		keys.consumerSecret,
+		'1.0A',
+		null,
 		'HMAC-SHA1'
 	);
 
@@ -25,7 +26,7 @@ exports.post = function(text) {
 		//display_coordinates: true
 	};
 
-	console.log('oauth sending post body:', body);
+	console.log('oauth sending post to', enviro, body);
 
 	tweeter.post(api.post, keys.token, keys.secret, body, 'application/json',
 		function(error, data){
