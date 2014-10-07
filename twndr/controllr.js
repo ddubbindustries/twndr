@@ -1,7 +1,7 @@
 if (typeof(window) == 'undefined') {
   $ = require('./streamr/node_modules/jquery');
   LocalStorage = require('./streamr/node_modules/node-localstorage').LocalStorage;
-  localStorage = new LocalStorage('./localStore', 25*1024*1024);
+  localStorage = new LocalStorage('../localStore', 25*1024*1024);
   util = require('../lib/util.js').util;
   lex = require('../lib/lexr.js').lex;
   var cfg = require('./cfg.js').cfg;
@@ -11,12 +11,16 @@ var go = {
   init: function(hooks){
     go.hooks = go.hooks || hooks;
     go.cfg = util.getConfigs() || cfg;
-    go.meta = {source:'', count:0, dupes:0, retweets:0, replies: 0};
+    go.meta = {source:'', count:0, dupes:0, retweets:0, replies: 0, nonEnglish: 0};
     
     lex.init();
     go.hooks.init();
 
-    if (util.local.get('chunks')) go.getStored(); 
+    if (cfg.useLocalStore && util.local.get('chunks')) {
+      go.getStored();
+    } else {
+      util.local.store('chunks','');
+    }
     if (cfg.stream) go.startStream(cfg.streamInterval);
   },
   refresh: function(){
@@ -26,13 +30,19 @@ var go = {
   },
   startStream: function(){
     var seconds = cfg.streamInterval;
-    go.getChunks({all: true});
     if (go.activeInterval) go.stopStream();
-    console.log('starting stream at '+seconds+'s interval');
+    if (cfg.cleanStart) {
+      console.log('getting new tweets from api and clearing its cache');
+      go.getChunks({cleanup: true});
+    } else { 
+      console.log('getting all cached tweets from api');
+      go.getChunks({all: true}); 
+    }
+    console.log('getting api at '+seconds+'s interval');
     go.activeInterval = setInterval(go.getChunks, seconds * 1000);
   },
   stopStream: function(){
-    console.log('stopping stream');
+    console.log('stopping api interval');
     clearInterval(go.activeInterval); 
   },
   getChunks: function(params){
@@ -61,6 +71,7 @@ var go = {
     if (lex.chunks[chunk.id_str]) return go.meta.dupes++;
     if (chunk.retweet_count > 0) return go.meta.retweets++;
     if (chunk.in_reply_to_user_id_str) return go.meta.replies++;
+    if (chunk.lang !== 'en') return go.meta.nonEnglish++;
     // if (!go.isInTimeRange(chunk.created_at, cfg.timeStart, cfg.timeEnd)) return go.meta.outOfTimeRange++;
     return false;
   },
@@ -85,6 +96,9 @@ var go = {
         go.meta.source = 'stream';
         go.meta.count = count;
         go.refresh();
+      },
+      error: function(e) {
+        console.log('api error:', e);
       }
     });
   },
@@ -120,6 +134,7 @@ var go = {
     });
   },
   getStored: function(){
+    console.log('getting chunks from localStore');
     console.time('build');
     var count = 0;
     var chunks = util.local.get('chunks');
@@ -135,8 +150,12 @@ var go = {
   },
   finalize: function(){
     console.log('finalized');
+    util.local.store(new Date().toISOString().replace(/[^0-9]/g,'') + '_lex', lex);
     go.stopStream();
     go.hooks.finalize(lex);
+    cfg.cleanStart = true;
+    $.extend(lex.topHistory, lex.top); 
+    go.init();
   }
 };
 
