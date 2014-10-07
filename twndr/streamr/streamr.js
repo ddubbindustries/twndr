@@ -28,38 +28,44 @@ exports.getStream = function(params, callback) {
 			&& coord[1] > rect[0]
 			&& coord[1] < rect[2]
 		);
-	};
+	},
+  filterTweet = function(tweet) {
+    if (tweet.geo && isValidGeo(tweet.geo.coordinates, params.locations.split(','))) {
+      process.stdout.write(tweet.place.full_name + ': ' + tweet.text);
+      callback(tweet);
+    } else {
+      process.stdout.write('x');
+    }
+  },
+  startStream = function() {
 
-	console.log('posting request:', params);
+    console.log('posting request:', params);
 
-	var req = auth.post(api.post, keys.token, keys.secret, params);
+    var req = auth.post(api.post, keys.token, keys.secret, params),
+        raw = '', 
+        tweet = {};
 
-	req.on('response', function(res){
-		var timer = new Date();
-		res.on('data', function(chunk){
-			var raw = chunk.toString();
-			raw = raw.replace(/\r\n$/,'').split("\r\n");
+    req.on('response', function(res){
+      var timer = new Date();
+      res.on('data', function(chunk){
+        raw += chunk.toString();
+        try {
+          tweet = JSON.parse(raw.replace(/\r\n$/,''));
+          filterTweet(tweet);
+          raw = '';
+        } catch (e) {
+          process.stdout.write('.');
+        }
+      });
 
-			if (raw[0] == '') {
-				console.log('*');
-			} else {
-				try {
-					raw.forEach(function(tweet){
-						tweet = JSON.parse(tweet);
-						if (tweet.geo && isValidGeo(tweet.geo.coordinates, params.locations.split(','))) {
-							callback(tweet);
-						} else {
-							process.stdout.write('.');
-						}
-					});
-				} catch (e) {
-					console.log('parsing error', e, raw);
-				}
-			}
-		});
+      res.on('end', function(ending){
+        console.log('closing connection of', (new Date() - timer) / 1000, 's');
+        startStream();
+      });
+    });
 
-		res.on('end', function(ending){
-			console.log('closing connection of', (new Date() - timer) / 1000, 's');
-		});
-	});
+  };
+
+  startStream();
+
 };

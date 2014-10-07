@@ -37,13 +37,13 @@ var http = require('http'),
     tweetStorage = util.local.get('tweets') || [],
     tweetBuffer = [];
 
-console.log('tweetStorage', tweetStorage.length);
+console.log('tweets from localStore', tweetStorage.length);
 
-getStream({locations: geo._toCSV(geo.reg)}, function(tweet){
+getStream({locations: geo._toCSV(geo[cfg.geo])}, function(tweet){
   tweetBuffer.push(tweet);
   tweetStorage.push(tweet);
   util.local.store('tweets', tweetStorage);
-  console.log(tweetBuffer.length, tweet.text);
+  process.stdout.write(' (' + tweetBuffer.length + ')');
 });
 
 http.createServer(function(req, res) {
@@ -57,7 +57,8 @@ http.createServer(function(req, res) {
   var out = JSON.stringify(params.all ? tweetStorage : tweetBuffer);
   res.writeHead(200, {"Content-Type": "application/json"});	
   res.end(params.callback ? params.callback + '(' + out + ');' : out);
-	if (params.all) { tweetStorage = []; } else { tweetBuffer = []; }
+	if (params.cleanup) tweetStorage = [];
+  tweetBuffer = [];
 
 }).listen(port);
 
