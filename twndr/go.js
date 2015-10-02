@@ -1,13 +1,3 @@
-// todo
-//  - limit one wordcount per author (might reduce emoji count)
-//  - enable multiple word lists
-//  - include popular image
-//  - inlcude permalink to analytics
-//  - search use 'today', 'week', 'weekend'
-//  - search use coordinates
-
-
-
 function Go(args) {
 
 if (typeof(window) == 'undefined') {
@@ -29,7 +19,7 @@ var go = {
       count: 100
     },
     apiMax: 10,
-    cache: false,
+    cache: true,
     maxRetweet: 10,
     locale: 'Blacksburg, VA',
     radius: '5mi',
@@ -100,8 +90,9 @@ var go = {
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
       
-        var media = tweet.entities.media;
-        media = media ? '<br><img clas="media" src="'+media[0].media_url+'">' : '';
+        var permalink = 'http://twitter.com/'+tweet.user.screen_name+'/status/'+tweet.id_str,
+            media = tweet.entities.media;
+            media = media ? '<br><img clas="media" src="'+media[0].media_url+'">' : '';
 
         okText += '<div id="'+tweet.id_str+'" class="tweet">'+
           util.buildRow({
@@ -110,7 +101,7 @@ var go = {
             user:   '<span title="'+tweet.user.description+'">'+tweet.user.screen_name+'</span>',
             followers: tweet.user.followers_count,
             RT:     tweet.retweet_count,
-            image: '<img src="'+tweet.user.profile_image_url+'">',
+            image: '<a target="_blank" href="'+permalink+'"><img src="'+tweet.user.profile_image_url+'"></a>',
             text:   util.hyperlinks(tweet.text) //+ media
           }) + '</div>';
         out.ok++;
