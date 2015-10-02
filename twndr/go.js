@@ -90,7 +90,8 @@ var go = {
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
       
-        var permalink = 'http://twitter.com/'+tweet.user.screen_name+'/status/'+tweet.id_str,
+        var userlink = 'http://twitter.com/'+tweet.user.screen_name,
+            permalink = userlink+'/status/'+tweet.id_str,
             media = tweet.entities.media;
             media = media ? '<br><img clas="media" src="'+media[0].media_url+'">' : '';
 
@@ -98,10 +99,10 @@ var go = {
           util.buildRow({
             time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
             source: util.removeHTML(tweet.source),
-            user:   '<span title="'+tweet.user.description+'">'+tweet.user.screen_name+'</span>',
             followers: tweet.user.followers_count,
             RT:     tweet.retweet_count,
-            image: '<a target="_blank" href="'+permalink+'"><img src="'+tweet.user.profile_image_url+'"></a>',
+            image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
+                      tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
             text:   util.hyperlinks(tweet.text) //+ media
           }) + '</div>';
         out.ok++;
