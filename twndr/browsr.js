@@ -17,21 +17,27 @@ var initBrowser = function(){
             userlink = 'http://twitter.com/'+tweet.user.screen_name,
             permalink = userlink+'/status/'+tweet.id_str,
             media = tweet.entities.media;
-            media = media ? '<br><img clas="media" src="'+media[0].media_url+'">' : '';
+            media = media ? '<img class="media" src="'+media[0].media_url+'">' : '',
+            columns = {
+              time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
+              tweets_per_day: (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
+              followers: tweet.user.followers_count,
+              RT:     tweet.retweet_count,
+              image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
+                        tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
+              text:   twemoji.parse(util.hyperlinks(tweet.text)) + media,
+              source: util.removeHTML(tweet.source)
+            };
 
-        $out.prepend(
-          '<div id="'+tweet.id_str+'" class="tweet">'+
-          util.buildRow({
-            time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
-            source: util.removeHTML(tweet.source),
-            tweets_per_day: (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
-            followers: tweet.user.followers_count,
-            RT:     tweet.retweet_count,
-            image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
-                      tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
-            text:   twemoji.parse(util.hyperlinks(tweet.text)) //+ media
-          }) + '</div>'
-        );
+        if (!$out.text()) {
+          var header = {};
+          $.each(columns, function(k,v){
+            header[k] = k;
+          });
+          $out.append('<div id="thead">'+util.buildRow(header)+'</div>');
+        }
+
+        $out.append('<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>');
  
       },
       afterBatch: function(out){

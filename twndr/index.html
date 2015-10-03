@@ -11,14 +11,14 @@ Released under the MIT license: http://jsbin.mit-license.org
 <meta name="robots" content="noindex">
 <html>
 <head>
-<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
   <meta charset="utf-8">
-  <title>twndr2</title>
+  <title>twndr</title>
+  <script src="//code.jquery.com/jquery-2.1.4.js"></script>
+  <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
   <script src="../lib/util.js"></script>
   <script src="../lib/lexr.js"></script>
   <script src="go.js"></script>
   <script src="browsr.js"></script>
-  <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
   <style>
     body {
       font: 12px sans-serif;
@@ -28,6 +28,11 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
     #search {
       width: 200px;
+    }
+    #twend {
+      font-size: 2em;
+      width: 50%;
+      padding: 20px;
     }
     .col {
       display: table-cell;
@@ -40,14 +45,15 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
     #meta li {
       cursor: pointer;
+      white-space: nowrap;
     }
     #meta li:hover, .hilight {
       background: lightSalmon;
     }
-    #out .tweet {
+    #out > div {
       display: table-row;
     }
-    #out .tweet > span {
+    #out > div > span {
       display: table-cell;
       vertical-align: middle;
       padding-right: 5px;
@@ -61,6 +67,11 @@ Released under the MIT license: http://jsbin.mit-license.org
       width: 1em;
       margin: 0 .05em 0 .1em;
       vertical-align: -0.1em;
+    }
+    img.media {
+      float: right;
+      width: 100px;
+      border-radius: 20px;
     }
   </style>
 </head>
