@@ -18,42 +18,51 @@ Released under the MIT license: http://jsbin.mit-license.org
   <script src="../lib/lexr.js"></script>
   <script src="go.js"></script>
   <script src="browsr.js"></script>
-<style id="jsbin-css">
-body {
-  font: 12px sans-serif;
-}
-#search {
-  width: 200px;
-}
-.col {
-  display: table-cell;
-  padding: 20px;
-}
-#meta {
-  width: 10%;
-  height: 500px;
-  overflow-y: scroll;
-}
-#meta li {
-  cursor: pointer;
-}
-#meta li:hover, .hilight {
-  background: lightSalmon;
-}
-#out .tweet {
-  display: table-row;
-}
-#out .tweet > span {
-  display: table-cell;
-  vertical-align: middle;
-  padding-right: 5px;
-}
-#out .tweet .image img {
-  height: 20px;
-  border-radius: 50%;
-}
-
-</style>
+  <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
+  <style>
+    body {
+      font: 12px sans-serif;
+    }
+    a {
+      color: cornflowerblue;
+    }
+    #search {
+      width: 200px;
+    }
+    .col {
+      display: table-cell;
+      padding: 20px;
+    }
+    #meta {
+      width: 10%;
+      height: 500px;
+      overflow-y: scroll;
+    }
+    #meta li {
+      cursor: pointer;
+    }
+    #meta li:hover, .hilight {
+      background: lightSalmon;
+    }
+    #out .tweet {
+      display: table-row;
+    }
+    #out .tweet > span {
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 5px;
+    }
+    #out .tweet .image img {
+      height: 20px;
+      border-radius: 50%;
+    }
+    img.emoji {
+      height: 1em;
+      width: 1em;
+      margin: 0 .05em 0 .1em;
+      vertical-align: -0.1em;
+    }
+  </style>
 </head>
 <body>
   <form id="input">

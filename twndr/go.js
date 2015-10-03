@@ -30,6 +30,7 @@ var go = {
     afterAll: function(){console.log('afterAll');}
   },
   init: function(args){ 
+    console.time('total time');
     lex.init();
     go.cfg.startTime = new Date().getTime();
     $.each(args || {}, function(k,v) {
@@ -89,24 +90,11 @@ var go = {
 
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
-      
-        var userlink = 'http://twitter.com/'+tweet.user.screen_name,
-            permalink = userlink+'/status/'+tweet.id_str,
-            media = tweet.entities.media;
-            media = media ? '<br><img clas="media" src="'+media[0].media_url+'">' : '';
-
-        okText += '<div id="'+tweet.id_str+'" class="tweet">'+
-          util.buildRow({
-            time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
-            source: util.removeHTML(tweet.source),
-            followers: tweet.user.followers_count,
-            RT:     tweet.retweet_count,
-            image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
-                      tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
-            text:   util.hyperlinks(tweet.text) //+ media
-          }) + '</div>';
-        out.ok++;
+        //window.setTimeout(function(){
+          go.cfg.processTweet(tweet);
+        //},1);
         go.tweetStore.ok[tweet.id_str] = tweet;
+        out.ok++;
       }
     });
     go.afterBatch(okText); 
@@ -132,6 +120,7 @@ var go = {
     if (!processed.old && go.apiCallCount > 0 && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
+      console.timeEnd('total time');
       go.cfg.afterAll(go);
     }
   },
