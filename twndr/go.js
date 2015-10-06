@@ -102,7 +102,7 @@ var go = {
   },
   afterBatch: function(okText) {
     lex.afterChunks(function(word){
-      return !util.isInString(word, go.cfg.locale.replace(/\W/g, ' ').toLowerCase());
+      return !util.isInString(word.replace(/^#/g, ''), util.getFullGeo(go.cfg.locale));
     });
     go.twend = lex.output.popular({maxChars: go.cfg.twendLength});
     go.cfg.afterBatch({

@@ -62,8 +62,8 @@ var initBrowser = function(){
               $('#meta .hilight').removeClass('hilight');
               $(this).addClass('hilight'); 
               $('.tweet').hide().filter(idselectors).show().find('.text').html(function(i,html){
-                var word = v.word.replace(/^\b|\b$/g, '\\b');
-                return html.replace(new RegExp(word, 'ig'), '<span class="hilight">$&</span>');
+                var rgx = new RegExp('\\b'+v.word+'\\b', 'ig'); 
+                return html.replace(rgx, '<span class="hilight">$&</span>');
               });
             }
           }).appendTo('#meta');
