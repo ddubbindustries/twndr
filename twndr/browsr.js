@@ -9,7 +9,9 @@ var initBrowser = function(){
     $('#twend, .col').empty();
     cfg.search = $('#search').val();
     util.local.store('cfg', cfg);
+    var outBuffer = '';
     var Twndr = new Go({
+      maxRetweet: 25,
       search: cfg.search,
       processTweet: function(tweet) {
             
@@ -20,12 +22,13 @@ var initBrowser = function(){
             media = media ? '<img class="media" src="'+media[0].media_url+'">' : '',
             columns = {
               time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
-              tweets_per_day: (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
+              tpd: (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
               followers: tweet.user.followers_count,
+              reply:  tweet.in_reply_to_status_id_str ? 'reply' : '',
               RT:     tweet.retweet_count,
               image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
                         tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
-              text:   twemoji.parse(util.hyperlinks(tweet.text)) + media,
+              text:   twemoji.parse(util.hyperlinks(tweet.text)), // + media,
               source: util.removeHTML(tweet.source)
             };
 
@@ -35,29 +38,32 @@ var initBrowser = function(){
             header[k] = k;
           });
           $out.append('<div id="thead">'+util.buildRow(header)+'</div>');
+          //outBuffer += '<div id="thead">'+util.buildRow(header)+'</div>';
         }
 
         $out.append('<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>');
+        //outBuffer += '<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>';
  
       },
       afterBatch: function(out){
 
-        //$('#out').append(out.text);
+        //$('#out').html(outBuffer);
         $('#twend').html(twemoji.parse(out.twend));
         
         $('#meta').empty();
         $.each(out.topArr, function(i,v){
           var idselectors = '#'+v.ids.join(', #');
           $('<li>'+twemoji.parse(v.word)+' '+v.count+'</li>').click(function(){
+            $('.text .hilight').contents().unwrap();
             if ($(this).is('.hilight')) {
               $('.tweet').show();
               $('#meta .hilight').removeClass('hilight');
             } else {
               $('#meta .hilight').removeClass('hilight');
               $(this).addClass('hilight'); 
-              $('.text .hilight').contents().unwrap();
               $('.tweet').hide().filter(idselectors).show().find('.text').html(function(i,html){
-                return html.replace(new RegExp('\\b'+v.word+'\\b', 'ig'), '<span class="hilight">$&</span>');
+                var word = v.word.replace(/^\b|\b$/g, '\\b');
+                return html.replace(new RegExp(word, 'ig'), '<span class="hilight">$&</span>');
               });
             }
           }).appendTo('#meta');

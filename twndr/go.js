@@ -112,8 +112,10 @@ var go = {
     });
   },
   router: function(data){
+    console.time('process');
     var processed = go.process(data.statuses),
       nextPage = data.search_metadata.next_results;
+    console.timeEnd('process');
 
     console.log('processed', processed);
     
