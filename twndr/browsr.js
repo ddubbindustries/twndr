@@ -92,7 +92,7 @@ var initBrowser = function(){
         });
       },
       afterAll: function(go) {
-        $out.delegate('.tweet', 'click', function(){
+        $('.tweet').click(function(){
           var tweet = go.tweetStore.ok[$(this).attr('id')];
           console.log('data', tweet);
         }); 
