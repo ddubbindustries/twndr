@@ -78,34 +78,40 @@ var go = {
         lastTweetTime = new Date(arr[arr.length-1].created_at),
         batchTimeRange = lastTweetTime - firstTweetTime,
         percentOfBatch = 0,
-        batchCompleteTime = new Date() - go.apiStartTime,
+        batchResponseTime = new Date() - go.apiStartTime,
         interpolatedTime = 0;
-    console.log('got batch in', batchCompleteTime, 'ms');
+    console.log('got batch in', batchResponseTime+'ms');
+    
     $.each(arr, function(i, tweet){
       tweetTime = new Date(tweet.created_at).getTime();
       hoursRelative = (tweetTime - go.cfg.startTime) / 3600000;
       percentOfBatch = (tweetTime - firstTweetTime) / batchTimeRange;
-      interpolatedTime = (percentOfBatch * (batchCompleteTime <= 1 ? 1000: batchCompleteTime)).toFixed();
+      interpolatedTime = (percentOfBatch * batchResponseTime).toFixed();
 
-      tweet.fakeDelay = interpolatedTime * 3;
+      tweet._delay = interpolatedTime * 3;
      
       util.tally(go.tweetStore.users, tweet.user.id_str); 
 
+      // too old
       if (hoursRelative < -go.cfg.hoursHistory) {
         return false;
       
+      // too robotic
       } else if (!util.twitter.acceptSource.test(util.removeHTML(tweet.source))) {
         go.tweetStore.bot[tweet.id_str] = tweet;
         return true;
       
+      // too many retweets
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
         return true;
 
+      // too chatty of a user
       } else if (go.tweetStore.users[tweet.user.id_str].count > go.cfg.maxPerUser) {
         go.tweetStore.chatty[tweet.id_str] = tweet;
         return true;
 
+      // just right!
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
         go.cfg.processTweet(tweet);

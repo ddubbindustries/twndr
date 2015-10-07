@@ -1,66 +1,3 @@
-var map = {},
-    marker = {},
-    infoWindow = null;
-
-var moveZone = function(zone){
-  console.log('zone moved', zone);
-};
-
-var initMap = function(geocode) {
-  map = new google.maps.Map(document.getElementById("map-canvas"),{
-    mapTypeId: google.maps.MapTypeId.ROADMAP,
-  });
-
-  var coords = geocode.split(',');
-
-  var delay = false, 
-    zone = new google.maps.Circle({
-      center: new google.maps.LatLng(coords[0], coords[1]),
-      radius: parseInt(coords[2].replace('mi',''))*1600,
-      strokeColor: "#FF0000",
-      strokeOpacity: 0.5,
-      fillColor: "#FF0000",
-      fillOpacity: 0.05,
-      strokeWeight: 2,
-      editable: true,
-      draggable: true
-    });
-
-  google.maps.event.addListener(zone, 'bounds_changed', function(){
-    if (delay) window.clearTimeout(delay);
-    delay = window.setTimeout(moveZone, 2000, zone);
-  });
-
-  zone.setMap(map);
-
-  map.fitBounds(zone.getBounds());
-};
-
-var addMarker = function(data){
-  var id = data.id_str,
-    icon = data.user.profile_image_url,
-    coords = data.geo.coordinates;
-
-  marker[id] = new google.maps.Marker({
-    position: new google.maps.LatLng(coords[0], coords[1]),
-    map: map,
-    icon: icon, 
-    optimized: false, 
-    animation: google.maps.Animation.DROP,
-    _id: id
-  });
-
-  google.maps.event.addListener(marker[id], 'click', function(){
-    var $elm = $('#'+id);
-    if (infoWindow && typeof infoWindow.close() == 'function') infoWindow.close();
-    infoWindow = new google.maps.InfoWindow({
-      maxWidth: 300,
-      content: $elm.find('.text').clone().addClass('infoWindow')[0]
-    });
-    infoWindow.open(map, marker[id]);
-  });
-};
-
 var initBrowser = function(){
   var cfg = util.local.get('cfg') || {};
   
@@ -75,12 +12,12 @@ var initBrowser = function(){
     var outBuffer = '';
     var Twndr = new Go({
       maxRetweet: 25,
-      maxPerUser: 5,
+      maxPerUser: 10,
       search: cfg.search,
       afterGeo: initMap,
       processTweet: function(tweet) {
         
-        if (tweet.geo) setTimeout(addMarker, tweet.fakeDelay, tweet);
+        if (tweet.geo) setTimeout(addMarker, tweet._delay || 0, tweet);
 
         var hoursRelative = util.getHoursAgo(tweet.created_at),
             userlink = 'http://twitter.com/'+tweet.user.screen_name,
@@ -89,7 +26,6 @@ var initBrowser = function(){
             media = media ? '<img class="media" src="'+media[0].media_url+'">' : '',
             columns = {
               time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
-              fake:   tweet.fakeDelay,
               tpd:    (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
               followers: tweet.user.followers_count,
               RT:     tweet.retweet_count,
