@@ -30,7 +30,7 @@ var go = {
     afterAll: function(){console.log('afterAll');}
   },
   init: function(args){ 
-    console.time('total time');
+    console.time('total time');    
     lex.init();
     go.cfg.startTime = new Date().getTime();
     $.each(args || {}, function(k,v) {
@@ -68,58 +68,46 @@ var go = {
     });
   },
   process: function(arr) {
-    var out = {ok: 0, bot: 0, rt: 0, old: 0},
-        hoursRelative = 0,
-        okText = '';
+    console.time('process');
+    var hoursRelative = 0;
     $.each(arr, function(i, tweet){
       hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
       
       if (hoursRelative < -go.cfg.hoursHistory) {
-        out.old++;
         return false;
       
       } else if (!util.twitter.acceptSource.test(util.removeHTML(tweet.source))) {
         go.tweetStore.bot[tweet.id_str] = tweet;
-        out.bot++;
         return true;
       
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
-        out.rt++;
         return true;
 
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
-        //window.setTimeout(function(){
-          go.cfg.processTweet(tweet);
-        //},1);
+        go.cfg.processTweet(tweet);
         go.tweetStore.ok[tweet.id_str] = tweet;
-        out.ok++;
       }
     });
-    go.afterBatch(okText); 
-    return out;
+    console.timeEnd('process');
+    go.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
-  afterBatch: function(okText) {
+  afterBatch: function() { 
     lex.afterChunks(function(word){
       return !util.isInString(word.replace(/^#/g, ''), util.getFullGeo(go.cfg.locale));
     });
+    go.topArr = lex.meta.topArr;
     go.twend = lex.output.popular({maxChars: go.cfg.twendLength});
-    go.cfg.afterBatch({
-      topArr: lex.meta.topArr,
-      twend: go.twend,
-      text: okText
-    });
+    go.cfg.afterBatch(go);
   },
   router: function(data){
-    console.time('process');
-    var processed = go.process(data.statuses),
-      nextPage = data.search_metadata.next_results;
-    console.timeEnd('process');
-
-    console.log('processed', processed);
+    go.process(data.statuses), 
+    go.afterBatch(); 
     
-    if (!processed.old && go.apiCallCount > 0 && nextPage) {
+    var nextPage = data.search_metadata.next_results;
+    
+    if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
       console.timeEnd('total time');
