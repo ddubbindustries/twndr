@@ -26,7 +26,8 @@ var go = {
     hoursHistory: 48,
     search: 'Blacksburg, VA 5mi 48hr',
     twendLength: 130,
-    afterBatch: function(out){console.log('afterBatch');},
+    afterGeo: function(){console.log('afterGeo');},
+    afterBatch: function(){console.log('afterBatch');},
     afterAll: function(){console.log('afterAll');}
   },
   init: function(args){ 
@@ -49,6 +50,7 @@ var go = {
     go.getAPI('/geo/search', {query: go.cfg.locale}, function(data){
       var coords = data.result.places[0].centroid;
       go.cfg.api.geocode = [coords[1], coords[0], go.cfg.radius].join(',');
+      go.cfg.afterGeo(go.cfg.api.geocode);
       go.getAPI('/search/tweets', go.cfg.api, go.router);
     }); 
   },

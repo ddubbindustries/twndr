@@ -13,6 +13,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 <head>
   <meta charset="utf-8">
   <title>twndr</title>
+  <script src="//maps.googleapis.com/maps/api/js?key=AIzaSyA_dx-KPD-X_TxsToAQzkGPdWi6i6xIwtA&sensor=false"></script>
   <script src="//code.jquery.com/jquery-2.1.4.js"></script>
   <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
   <script src="../lib/util.js"></script>
@@ -31,7 +32,7 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
     #twend {
       font-size: 2em;
-      width: 26em;
+      width: 50%;
       padding: 1em;
     }
     .col {
@@ -70,9 +71,20 @@ Released under the MIT license: http://jsbin.mit-license.org
       width: 100px;
       border-radius: 20px;
     }
+    #map-canvas {
+      height: 500px;
+      width: 50%;
+      float: right;
+    }
+    #map-canvas img[src*='profile_images'] {
+      height: 20px !important;
+      width: 20px !important;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
+  <div id="map-canvas"></div>
   <form id="input">
     <input id="search" type="text">
     <input id="go" type="submit" value="Go">
