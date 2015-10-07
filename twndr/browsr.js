@@ -1,5 +1,6 @@
 var map = {},
-    marker = {};
+    marker = {},
+    infoWindow = null;
 
 var moveZone = function(zone){
   console.log('zone moved', zone);
@@ -38,8 +39,7 @@ var initMap = function(geocode) {
 var addMarker = function(data){
   var id = data.id_str,
     icon = data.user.profile_image_url,
-    coords = data.geo.coordinates,
-    infoWindow = {};
+    coords = data.geo.coordinates;
 
   marker[id] = new google.maps.Marker({
     position: new google.maps.LatLng(coords[0], coords[1]),
@@ -52,6 +52,7 @@ var addMarker = function(data){
 
   google.maps.event.addListener(marker[id], 'click', function(){
     var $elm = $('#'+id);
+    if (infoWindow && typeof infoWindow.close() == 'function') infoWindow.close();
     infoWindow = new google.maps.InfoWindow({
       maxWidth: 300,
       content: $elm.find('.text').clone().addClass('infoWindow')[0]
@@ -74,11 +75,12 @@ var initBrowser = function(){
     var outBuffer = '';
     var Twndr = new Go({
       maxRetweet: 25,
+      maxPerUser: 5,
       search: cfg.search,
       afterGeo: initMap,
       processTweet: function(tweet) {
         
-        if (tweet.geo) addMarker(tweet);
+        if (tweet.geo) setTimeout(addMarker, tweet.fakeDelay, tweet);
 
         var hoursRelative = util.getHoursAgo(tweet.created_at),
             userlink = 'http://twitter.com/'+tweet.user.screen_name,
@@ -87,7 +89,8 @@ var initBrowser = function(){
             media = media ? '<img class="media" src="'+media[0].media_url+'">' : '',
             columns = {
               time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
-              tpd: (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
+              fake:   tweet.fakeDelay,
+              tpd:    (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
               followers: tweet.user.followers_count,
               RT:     tweet.retweet_count,
               image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
@@ -158,6 +161,7 @@ var initBrowser = function(){
           console.log('data', tweet);
         }); 
         console.log('all done, total tweets:', Object.keys(go.tweetStore.ok).length, go.twend);
+        console.log('tweetStore', go.tweetStore);
       }
     });
   }).submit();

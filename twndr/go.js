@@ -37,7 +37,7 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetStore = {ok: {}, bot: {}, rt: {}};
+    go.tweetStore = {ok: {}, bot: {}, rt: {}, chatty: {}, users: {}};
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg); 
     go.getGeo(go.cfg.search);
@@ -55,6 +55,7 @@ var go = {
     }); 
   },
   getAPI: function(path, params, callback) {
+    go.apiStartTime = new Date();
     var key = path + '?'+ (typeof params == 'object' ? $.param(params) : params);
     if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
     $.ajax({
@@ -71,10 +72,25 @@ var go = {
   },
   process: function(arr) {
     console.time('process');
-    var hoursRelative = 0;
+    var tweetTime = 0,
+        hoursRelative = 0,
+        firstTweetTime = new Date(arr[0].created_at),
+        lastTweetTime = new Date(arr[arr.length-1].created_at),
+        batchTimeRange = lastTweetTime - firstTweetTime,
+        percentOfBatch = 0,
+        batchCompleteTime = new Date() - go.apiStartTime,
+        interpolatedTime = 0;
+    console.log('got batch in', batchCompleteTime, 'ms');
     $.each(arr, function(i, tweet){
-      hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
-      
+      tweetTime = new Date(tweet.created_at).getTime();
+      hoursRelative = (tweetTime - go.cfg.startTime) / 3600000;
+      percentOfBatch = (tweetTime - firstTweetTime) / batchTimeRange;
+      interpolatedTime = (percentOfBatch * (batchCompleteTime <= 1 ? 1000: batchCompleteTime)).toFixed();
+
+      tweet.fakeDelay = interpolatedTime * 3;
+     
+      util.tally(go.tweetStore.users, tweet.user.id_str); 
+
       if (hoursRelative < -go.cfg.hoursHistory) {
         return false;
       
@@ -84,6 +100,10 @@ var go = {
       
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
+        return true;
+
+      } else if (go.tweetStore.users[tweet.user.id_str].count > go.cfg.maxPerUser) {
+        go.tweetStore.chatty[tweet.id_str] = tweet;
         return true;
 
       } else {
