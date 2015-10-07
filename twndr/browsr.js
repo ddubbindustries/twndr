@@ -27,7 +27,8 @@ var initBrowser = function(){
             columns = {
               time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
               tpd:    (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
-              followers: tweet.user.followers_count,
+              reply:  !!tweet.in_reply_to_status_id_str,
+              fllwrs: tweet.user.followers_count,
               RT:     tweet.retweet_count,
               image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
                         tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',

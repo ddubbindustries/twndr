@@ -37,7 +37,7 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetStore = {ok: {}, bot: {}, rt: {}, chatty: {}, users: {}};
+    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, users: {}};
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg); 
     go.getGeo(go.cfg.search);
@@ -63,7 +63,7 @@ var go = {
       url: go.cfg.url+key,
       success: function(data){
         console.log('got '+util.getFileSize(data), go.apiCallCount--, 'api calls to go');
-        if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
+        //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
         if (go.cfg.cache) util.local.store(key, data);
       },
@@ -105,6 +105,10 @@ var go = {
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
         return true;
+
+      // too direct of a reply
+      } else if (tweet.in_reply_to_status_id_str) {
+        go.tweetStore.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
       } else if (go.tweetStore.users[tweet.user.id_str].count > go.cfg.maxPerUser) {
