@@ -45,13 +45,23 @@ var initBrowser = function(){
         //outBuffer += '<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>';
  
       },
-      afterBatch: function(out){
+      afterBatch: function(go){
 
         //$('#out').html(outBuffer);
-        $('#twend').html(twemoji.parse(out.twend));
+        var progress = {};
+        $.each(go.tweetStore, function(k,v){
+          progress[k] = Object.keys(v).length;
+        });
+        
+        $('#api').html(
+          (go.percentDone*100).toFixed()+'% of history '+
+          JSON.stringify(progress).replace(/[\{\}\"]/g, '').replace(/[\,\:]/g, '$& ')
+        );
+        
+        $('#twend').html(twemoji.parse(go.twend));
         
         $('#meta').empty();
-        $.each(out.topArr, function(i,v){
+        $.each(go.topArr, function(i,v){
           var idselectors = '#'+v.ids.join(', #');
           $('<li>'+twemoji.parse(v.word)+' '+v.count+'</li>').click(function(){
             $('.text .hilight').contents().unwrap();
@@ -68,7 +78,6 @@ var initBrowser = function(){
             }
           }).appendTo('#meta');
         });
-        $('<li>[ALL]</li>').hover(function(){$('#out li').show();}).appendTo('#meta');
       },
       afterAll: function(go) {
         $out.delegate('.tweet', 'click', function(){
