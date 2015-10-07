@@ -38,8 +38,13 @@ var initMap = function(geocode) {
 
 var addMarker = function(data){
   var id = data.id_str,
-    icon = data.user.profile_image_url,
-    coords = data.geo.coordinates;
+    coords = data.geo.coordinates,
+    icon = new google.maps.MarkerImage(
+      data.user.profile_image_url,
+      new google.maps.Size(20,20),
+      new google.maps.Point(0,0),
+      new google.maps.Point(0,20)
+    );
 
   marker[id] = new google.maps.Marker({
     position: new google.maps.LatLng(coords[0], coords[1]),
