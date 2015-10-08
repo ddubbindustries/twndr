@@ -1,15 +1,14 @@
 var initBrowser = function(){
-  var cfg = util.local.get('cfg') || {};
-  
-  var $out = $('#out');
-  
-  $('#search').val(cfg.search);
+  var cfg = util.local.get('cfg') || {},
+      $out = $('#out'),
+      $stats = $('#stats'),
+      $search = $('#search').val(cfg.search);
+      
   $('#input').submit(function(e){
     e.preventDefault();
-    $('#twend, .col').empty();
     cfg.search = $('#search').val();
     util.local.store('cfg', cfg);
-    var outBuffer = '';
+    
     var Twndr = new Go({
       maxRetweet: 25,
       maxPerUser: 10,
@@ -38,27 +37,15 @@ var initBrowser = function(){
 
         if (!$out.text()) {
           var header = {};
-          $.each(columns, function(k,v){
-            header[k] = k;
-          });
-          $out.append('<div id="thead">'+util.buildRow(header)+'</div>');
-          //outBuffer += '<div id="thead">'+util.buildRow(header)+'</div>';
+          $.each(columns, function(k,v){ header[k] = k; });
+          $out.html('<div id="thead">'+util.buildRow(header)+'</div>');
+        } else {
+          $out.append('<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>');
         }
-
-        $out.append('<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>');
-        //outBuffer += '<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>';
- 
       },
       afterBatch: function(go){
-
-        //$('#out').html(outBuffer);
-        var $stats = $('#stats').html(
-          (go.percentDone*100).toFixed()+'% of history '
-        );
-
-        $.each(go.tweetStore, function(k,v){
-          $stats.append(k+': '+Object.keys(v).length+' ');
-        });
+        $stats.html((go.percentDone*100).toFixed()+'% of history ');
+        $.each(go.tweetStore, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
                 
         var printWords = function(arr, template, charLength) {
           var $temp = $('<div/>'),
