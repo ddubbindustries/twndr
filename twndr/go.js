@@ -37,7 +37,7 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, users: {}};
+    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}, users: {}};
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg); 
     go.getGeo(go.cfg.search);
@@ -99,12 +99,10 @@ var go = {
       // too robotic
       } else if (!util.twitter.acceptSource.test(util.removeHTML(tweet.source))) {
         go.tweetStore.bot[tweet.id_str] = tweet;
-        return true;
       
       // too many retweets
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
-        return true;
 
       // too direct of a reply
       } else if (tweet.in_reply_to_status_id_str) {
@@ -113,7 +111,10 @@ var go = {
       // too chatty of a user
       } else if (go.tweetStore.users[tweet.user.id_str].count > go.cfg.maxPerUser) {
         go.tweetStore.chatty[tweet.id_str] = tweet;
-        return true;
+
+      // too out of bounds
+      } else if (!tweet.geo) {
+        go.tweetStore.nogeo[tweet.id_str] = tweet;
 
       // just right!
       } else {
