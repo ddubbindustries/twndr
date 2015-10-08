@@ -33,21 +33,30 @@ Released under the MIT license: http://jsbin.mit-license.org
     }
     #twend {
       font-size: 2em;
-      width: 50%;
       padding: 1em;
+    }
+    #twend span {
+      display: inline-block;
     }
     .col {
       display: table-cell;
+      padding-right: 1em;
     }
     #meta {
       width: 10%;
     }
     #meta li {
-      cursor: pointer;
       white-space: nowrap;
+      margin: -0.15em;
     }
-    #meta li:hover, .hilight {
+    .filterWord:hover, .hilight {
       background: lightSalmon;
+      border-radius: 0.3em;
+      padding: 0.15em;
+    }
+    .filterWord {
+      cursor: pointer;
+      padding: 0.15em;
     }
     #out > div {
       display: table-row;
@@ -91,8 +100,8 @@ Released under the MIT license: http://jsbin.mit-license.org
     <input id="search" type="text">
     <input id="go" type="submit" value="Go">
     <input id="cache" type="button" value="Clear Cache & Go">
-    <span id="api"></span>
   </form>
+  <div id="stats"></div>
   <div id="twend"></div>
   <ol id="meta" class="col"></ol>
   <div id="out" class="col"></div>

@@ -27,13 +27,13 @@ var initBrowser = function(){
             columns = {
               time:   hoursRelative.toFixed(1)+'h', //util.relativeTime(tweet.created_at, 3),
               tpd:    (tweet.user.statuses_count / util.getHoursAgo(tweet.user.created_at) * 24).toFixed(1),
-              reply:  !!tweet.in_reply_to_status_id_str,
               fllwrs: tweet.user.followers_count,
+              faves:  tweet.favorite_count,
               RT:     tweet.retweet_count,
               image: '<a target="_blank" href="'+userlink+'" title="'+tweet.user.screen_name+': '+
                         tweet.user.description+'"><img src="'+tweet.user.profile_image_url+'"></a>',
               text:   twemoji.parse(util.hyperlinks(tweet.text)), // + media,
-              source: util.removeHTML(tweet.source)
+              //source: util.removeHTML(tweet.source)
             };
 
         if (!$out.text()) {
@@ -52,45 +52,60 @@ var initBrowser = function(){
       afterBatch: function(go){
 
         //$('#out').html(outBuffer);
-        var progress = {};
-        $.each(go.tweetStore, function(k,v){
-          progress[k] = Object.keys(v).length;
-        });
-        
-        $('#api').html(
-          (go.percentDone*100).toFixed()+'% of history '+
-          JSON.stringify(progress).replace(/[\{\}\"]/g, '').replace(/[\,\:]/g, '$& ')
+        var $stats = $('#stats').html(
+          (go.percentDone*100).toFixed()+'% of history '
         );
-        
-        $('#twend').html(twemoji.parse(go.twend));
-        
-        $('#meta').empty();
-        $.each(go.topArr, function(i,v){
-          var ids = v.ids, 
-              idselectors = '#'+v.ids.join(', #');
-          $('<li>'+twemoji.parse(v.word)+' '+v.count+'</li>').click(function(){
-            $('.text .hilight').contents().unwrap();
-            if ($(this).is('.hilight')) {
-              $('.tweet').show();
-              $('#meta .hilight').removeClass('hilight');
-              
-              $.each(marker, function(id,mark){
-                mark.setVisible(true);
-              });
-            } else {
-              $('#meta .hilight').removeClass('hilight');
-              $(this).addClass('hilight'); 
-              $('.tweet').hide().filter(idselectors).show().find('.text').html(function(i,html){
-                var rgx = new RegExp('\\b'+v.word+'\\b', 'ig'); 
-                return html.replace(rgx, '<span class="hilight">$&</span>');
-              });
-              
-              $.each(marker, function(id,mark){
-                mark.setVisible(ids.indexOf(id) > -1);
-              });
-            }
-          }).appendTo('#meta');
+
+        $.each(go.tweetStore, function(k,v){
+          $stats.append(k+': '+Object.keys(v).length+' ');
         });
+                
+        var printWords = function(arr, template, charLength) {
+          var $temp = $('<div/>'),
+              total = '';
+
+          $.each(arr, function(i,v){
+            var ids = v.ids, 
+                idselectors = '#'+v.ids.join(', #');
+
+            total += v.word + ' ';
+            if (total.length - 1 > charLength) return false;
+                
+            $(template(v)).addClass('filterWord').click(function(){
+              $('.text .hilight').contents().unwrap();
+              if ($(this).is('.hilight')) {
+                $('.tweet').show();
+                $('.hilight').removeClass('hilight');
+                
+                $.each(marker, function(id,mark){
+                  mark.setVisible(true);
+                });
+              } else {
+                $('.hilight').removeClass('hilight');
+                $(this).addClass('hilight'); 
+                $('.tweet').hide().filter(idselectors).show().find('.text').html(function(i,html){
+                  var rgx = new RegExp('\\b'+v.word+'\\b', 'ig'); 
+                  return html.replace(rgx, '<span class="hilight">$&</span>');
+                });
+                
+                $.each(marker, function(id,mark){
+                  mark.setVisible(ids.indexOf(id) > -1);
+                });
+              }
+            }).appendTo($temp);
+          });
+
+          return $temp.contents();
+        };
+
+        $('#twend').html(printWords(go.topArr, function(v){
+          return '<span title="'+v.count+'">'+twemoji.parse(v.word)+'</span>';
+        }, cfg.twendLength));
+        
+        $('#meta').html(printWords(go.topArr, function(v){
+          return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
+        }));
+
       },
       afterAll: function(go) {
         $('.tweet').click(function(){
