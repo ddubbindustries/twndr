@@ -9,21 +9,23 @@ var moveZone = function(zone){
 var initMap = function(geocode) {
   map = new google.maps.Map(document.getElementById("map-canvas"),{
     mapTypeId: google.maps.MapTypeId.ROADMAP,
+    streetViewControl: false,
+    zoomControl: false,
+    mapTypeControl: false
   });
 
-  var coords = geocode.split(',');
-
   var delay = false, 
+    coords = geocode.split(',');
     zone = new google.maps.Circle({
       center: new google.maps.LatLng(coords[0], coords[1]),
       radius: parseInt(coords[2].replace('mi',''))*1600,
-      strokeColor: "#FF0000",
+      strokeColor: "#0000FF",
       strokeOpacity: 0.5,
-      fillColor: "#FF0000",
+      fillColor: "#0000FF",
       fillOpacity: 0.05,
       strokeWeight: 2,
       editable: true,
-      draggable: true
+      draggable: false
     });
 
   google.maps.event.addListener(zone, 'bounds_changed', function(){
@@ -34,6 +36,7 @@ var initMap = function(geocode) {
   zone.setMap(map);
 
   map.fitBounds(zone.getBounds());
+
 };
 
 var addMarker = function(data){
