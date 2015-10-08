@@ -38,21 +38,34 @@ var go = {
       go.cfg[k] = v;
     });
     go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}, users: {}};
+    go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
-    console.log('set globals go.cfg', go.cfg); 
-    go.getGeo(go.cfg.search);
+    console.log('set globals go.cfg', go.cfg);
+    go.parseSearch(go.cfg.search);
+    go.getGeo(go.cfg.locale, function(coords) { 
+      go.cfg.api.geocode = [coords[1], coords[0], go.cfg.radius].join(',');
+      go.cfg.afterGeo(go.cfg.api.geocode);
+      go.getAPI('/search/tweets', go.cfg.api, go.router);
+    });
   },
-  getGeo: function(search) {
+  parseSearch: function(search) {
     var parsed = util.twitter.parseQuery(search);
     go.cfg.hoursHistory = parseInt(parsed.time.replace('hr','')) || go.cfg.hoursHistory;
     go.cfg.locale = parsed.locale || go.cfg.locale;
     go.cfg.radius = parsed.distance || go.cfg.radius;
-    go.getAPI('/geo/search', {query: go.cfg.locale}, function(data){
-      var coords = data.result.places[0].centroid;
-      go.cfg.api.geocode = [coords[1], coords[0], go.cfg.radius].join(',');
-      go.cfg.afterGeo(go.cfg.api.geocode);
-      go.getAPI('/search/tweets', go.cfg.api, go.router);
-    }); 
+  },
+  getGeo: function(locale, success) {
+    if (typeof getGoogleCoords == 'function') {
+      getGoogleCoords(locale, function(data){
+        var coords = data[0].geometry.location;
+        success([coords.M, coords.J]); // not sure why it's these arbitrary keys, pure compression for speed?
+      });
+    } else {
+      go.getAPI('/geo/search', {query: locale}, function(data) {
+        var coords = data.result.places[0].centroid;
+        success(coords);
+      });
+    }
   },
   getAPI: function(path, params, callback) {
     go.apiStartTime = new Date();
@@ -135,10 +148,12 @@ var go = {
     go.cfg.afterBatch(go);
   },
   router: function(data){
-    go.process(data.statuses), 
-    go.afterBatch(); 
-    
-    var nextPage = data.search_metadata.next_results;
+    var nextPage = false;
+    if (data.statuses.length) {
+      go.process(data.statuses), 
+      go.afterBatch(); 
+      nextPage = data.search_metadata.next_results;
+    }
     
     if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);

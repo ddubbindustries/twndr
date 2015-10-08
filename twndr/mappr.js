@@ -2,11 +2,7 @@ var map = {},
     marker = {},
     infoWindow = null;
 
-var moveZone = function(zone){
-  console.log('zone moved', zone);
-};
-
-var initMap = function(geocode) {
+var initMap = function(geocode, moveZone) {
   map = new google.maps.Map(document.getElementById("map-canvas"),{
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     streetViewControl: false,
@@ -29,6 +25,7 @@ var initMap = function(geocode) {
     });
 
   google.maps.event.addListener(zone, 'bounds_changed', function(){
+    if (!moveZone) moveZone = function(zone){ console.log('zone moved', zone); };
     if (delay) window.clearTimeout(delay);
     delay = window.setTimeout(moveZone, 2000, zone);
   });
@@ -69,4 +66,13 @@ var addMarker = function(data){
   });
 };
 
-
+var getGoogleCoords = function(string, success) {
+  var geocoder = new google.maps.Geocoder();
+  geocoder.geocode( { 'address': string }, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      success(results); 
+    } else {
+      console.log('no geocode results:', status);
+    }
+  });
+};
