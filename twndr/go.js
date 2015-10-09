@@ -37,7 +37,8 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}, users: {}};
+    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+    go.freq = {user: {}, src: {}};
     go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg);
@@ -94,8 +95,6 @@ var go = {
       hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
       tweet._delay = i * 20;
      
-      util.tally(go.tweetStore.users, tweet.user.id_str); 
-
       // too old
       if (hoursRelative < -go.cfg.hoursHistory) {
         return false;
@@ -113,7 +112,7 @@ var go = {
         go.tweetStore.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
-      } else if (go.tweetStore.users[tweet.user.id_str].count - 1 > go.cfg.maxPerUser) {
+      } else if (go.freq.user[tweet.user.screen_name] && go.freq.user[tweet.user.screen_name].count > go.cfg.maxPerUser) {
         go.tweetStore.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
@@ -123,6 +122,10 @@ var go = {
       // just right!
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
+      
+        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str); 
+        util.tally(go.freq.src, util.parseLink(tweet.source).text, tweet.id_str); 
+
         go.cfg.processTweet(tweet);
         go.tweetStore.ok[tweet.id_str] = tweet;
       }

@@ -90,10 +90,14 @@ var initBrowser = function(){
           return '<span title="'+v.count+'">'+twemoji.parse(v.word)+'</span>';
         }, cfg.twendLength));
         
-        $('#meta').html(printWords(go.topArr, function(v){
+        $('#words').html(printWords(go.topArr, function(v){
           return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
         }));
-
+        
+        var userTop = util.sortArr(util.objToArr(go.freq.user, 'word'), 'count');
+        $('#users').html(printWords(userTop, function(v){
+          return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
+        }));
       },
       afterAll: function(go) {
         $('.tweet').click(function(){
@@ -102,6 +106,7 @@ var initBrowser = function(){
         }); 
         console.log('all done, total tweets:', Object.keys(go.tweetStore.ok).length, go.twend);
         console.log('tweetStore', go.tweetStore);
+        freq = go.freq; // for messing with in console
       }
     });
   }).submit();

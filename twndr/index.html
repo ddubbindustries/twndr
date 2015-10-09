@@ -23,7 +23,7 @@ Released under the MIT license: http://jsbin.mit-license.org
   <script src="browsr.js"></script>
   <style>
     body {
-      font: 13px sans-serif;
+      font: 12px sans-serif;
     }
     a {
       color: cornflowerblue;
@@ -55,14 +55,14 @@ Released under the MIT license: http://jsbin.mit-license.org
       display: table-cell;
       padding-right: 1em;
     }
-    #meta {
+    .freq {
       height: 500px;
       margin: 0;
       padding: 5px 10px 5px 40px;
       overflow: hidden;
       overflow-y: auto;
     }
-    #meta li {
+    .freq li {
       white-space: nowrap;
       margin: -0.15em;
     }
@@ -117,9 +117,13 @@ Released under the MIT license: http://jsbin.mit-license.org
     <div id="stats" class="note"></div>
     <div id="twend"></div>
   </div>
-  <div id="metaWrap" class="col">
-    <div class="note">Word Frequency</div>
-    <ol id="meta"></ol>
+  <div class="col">
+    <div class="note">words</div>
+    <ol id="words" class="freq"></ol>
+  </div>
+  <div class="col">
+    <div class="note">users</div>
+    <ol id="users" class="freq"></ol>
   </div>
   <div id="out" class="col"></div>
 </body>
