@@ -1,5 +1,5 @@
 var map = {},
-    marker = {},
+    markers = {},
     infoWindow = null;
 
 var initMap = function(geocode, moveZone) {
@@ -10,7 +10,7 @@ var initMap = function(geocode, moveZone) {
     mapTypeControl: false
   });
 
-  var delay = false, 
+  var delay = false,
     coords = geocode.split(',');
     zone = new google.maps.Circle({
       center: new google.maps.LatLng(coords[0], coords[1]),
@@ -46,23 +46,23 @@ var addMarker = function(data){
       new google.maps.Point(0,20)
     );
 
-  marker[id] = new google.maps.Marker({
+  markers[id] = new google.maps.Marker({
     position: new google.maps.LatLng(coords[0], coords[1]),
     map: map,
-    icon: icon, 
-    optimized: false, 
+    icon: icon,
+    optimized: false,
     animation: google.maps.Animation.DROP,
     _id: id
   });
 
-  google.maps.event.addListener(marker[id], 'click', function(){
+  google.maps.event.addListener(markers[id], 'click', function(){
     var $elm = $('#'+id);
     if (infoWindow && typeof infoWindow.close() == 'function') infoWindow.close();
     infoWindow = new google.maps.InfoWindow({
       maxWidth: 300,
       content: $elm.find('.text').clone().addClass('infoWindow')[0]
     });
-    infoWindow.open(map, marker[id]);
+    infoWindow.open(map, markers[id]);
   });
 };
 
@@ -70,7 +70,7 @@ var getGoogleCoords = function(string, success) {
   var geocoder = new google.maps.Geocoder();
   geocoder.geocode( { 'address': string }, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
-      success(results); 
+      success(results);
     } else {
       console.log('no geocode results:', status);
     }

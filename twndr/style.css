@@ -32,9 +32,11 @@ a {
   padding-right: 1em;
 }
 .freq {
-  height: 500px;
   margin: 0;
   padding: 5px 10px 5px 40px;
+}
+.scroll {
+  height: 500px;
   overflow: hidden;
   overflow-y: auto;
 }
@@ -51,10 +53,10 @@ a {
   cursor: pointer;
   padding: 0.15em;
 }
-#out > div {
+.row {
   display: table-row;
 }
-#out > div > span {
+.row > span {
   display: table-cell;
   vertical-align: middle;
   padding-right: 5px;
