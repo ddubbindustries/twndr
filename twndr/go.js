@@ -85,23 +85,14 @@ var go = {
   },
   process: function(arr) {
     console.time('process');
-    var tweetTime = 0,
-        hoursRelative = 0,
-        firstTweetTime = new Date(arr[0].created_at),
-        lastTweetTime = new Date(arr[arr.length-1].created_at),
-        batchTimeRange = lastTweetTime - firstTweetTime,
-        percentOfBatch = 0,
-        batchResponseTime = new Date() - go.apiStartTime,
-        interpolatedTime = 0;
+    var hoursRelative = 0,
+        batchResponseTime = new Date() - go.apiStartTime;
+
     console.log('got batch in', batchResponseTime+'ms');
     
     $.each(arr, function(i, tweet){
-      tweetTime = new Date(tweet.created_at).getTime();
-      hoursRelative = (tweetTime - go.cfg.startTime) / 3600000;
-      percentOfBatch = (tweetTime - firstTweetTime) / batchTimeRange;
-      interpolatedTime = (percentOfBatch * batchResponseTime).toFixed();
-
-      tweet._delay = interpolatedTime * 3;
+      hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
+      tweet._delay = i * 20;
      
       util.tally(go.tweetStore.users, tweet.user.id_str); 
 

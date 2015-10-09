@@ -8,6 +8,7 @@ var initBrowser = function(){
     e.preventDefault();
     cfg.search = $('#search').val();
     util.local.store('cfg', cfg);
+    $out.empty();
     
     var Twndr = new Go({
       maxRetweet: 25,
