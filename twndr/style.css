@@ -1,0 +1,82 @@
+body {
+  font: 12px sans-serif;
+}
+a {
+  color: cornflowerblue;
+}
+#map-canvas {
+  height: 500px;
+  width: 500px;
+  float: right;
+}
+#upper {
+  text-align: center;
+  padding: 1em;
+}
+#input {
+  margin-bottom: 3px;
+}
+#search {
+  width: 15em;
+  border-radius: 0.3em;
+}
+#twend {
+  font-size: 2em;
+  padding: 1em;
+}
+#twend span {
+  display: inline-block;
+}
+.col {
+  display: table-cell;
+  padding-right: 1em;
+}
+.freq {
+  height: 500px;
+  margin: 0;
+  padding: 5px 10px 5px 40px;
+  overflow: hidden;
+  overflow-y: auto;
+}
+.freq li {
+  white-space: nowrap;
+  margin: -0.15em;
+}
+.filterWord:hover, .hilight {
+  background: lightSalmon;
+  border-radius: 0.3em;
+  padding: 0.15em;
+}
+.filterWord {
+  cursor: pointer;
+  padding: 0.15em;
+}
+#out > div {
+  display: table-row;
+}
+#out > div > span {
+  display: table-cell;
+  vertical-align: middle;
+  padding-right: 5px;
+}
+.note {
+  text-transform: uppercase;
+  font-size: 0.75em
+}
+img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
+img.media {
+  float: right;
+  width: 100px;
+  border-radius: 20px;
+}
+img[src*='profile_images'] {
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50%;
+  Xbox-shadow: 1px 1px 5px gray;
+}
