@@ -38,7 +38,7 @@ var initBrowser = function(){
         if (!$out.text()) {
           var header = {};
           $.each(columns, function(k,v){ header[k] = k; });
-          $out.html('<div id="thead">'+util.buildRow(header)+'</div>');
+          $out.html('<div id="thead" class="note">'+util.buildRow(header)+'</div>');
         } else {
           $out.append('<div id="'+tweet.id_str+'" class="tweet">'+util.buildRow(columns)+'</div>');
         }

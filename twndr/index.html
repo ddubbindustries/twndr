@@ -23,13 +23,26 @@ Released under the MIT license: http://jsbin.mit-license.org
   <script src="browsr.js"></script>
   <style>
     body {
-      font: 12px sans-serif;
+      font: 13px sans-serif;
     }
     a {
       color: cornflowerblue;
     }
+    #map-canvas {
+      height: 500px;
+      width: 500px;
+      float: right;
+    }
+    #upper {
+      text-align: center;
+      padding: 1em;
+    }
+    #input {
+      margin-bottom: 3px;
+    }
     #search {
-      width: 200px;
+      width: 15em;
+      border-radius: 0.3em;
     }
     #twend {
       font-size: 2em;
@@ -69,7 +82,7 @@ Released under the MIT license: http://jsbin.mit-license.org
       vertical-align: middle;
       padding-right: 5px;
     }
-    #thead {
+    .note {
       text-transform: uppercase;
       font-size: 0.75em
     }
@@ -84,11 +97,6 @@ Released under the MIT license: http://jsbin.mit-license.org
       width: 100px;
       border-radius: 20px;
     }
-    #map-canvas {
-      height: 500px;
-      width: 50%;
-      float: right;
-    }
     img[src*='profile_images'] {
       height: 20px !important;
       width: 20px !important;
@@ -99,14 +107,17 @@ Released under the MIT license: http://jsbin.mit-license.org
 </head>
 <body>
   <div id="map-canvas"></div>
-  <form id="input">
-    <input id="search" type="text">
-    <input id="go" type="submit" value="Go">
-    <input id="cache" type="button" value="Clear Cache & Go">
-  </form>
-  <div id="stats"></div>
-  <div id="twend"></div>
+  <div id="upper">
+    <form id="input">
+      <input id="search" type="text">
+      <input id="go" type="submit" value="Go">
+      <input id="cache" type="button" value="Clear Cache & Go">
+    </form>
+    <div id="stats" class="note"></div>
+    <div id="twend"></div>
+  </div>
   <div id="metaWrap" class="col">
+    <div class="note">Word Frequency</div>
     <ol id="meta"></ol>
   </div>
   <div id="out" class="col"></div>
