@@ -110,7 +110,7 @@ var go = {
         return false;
       
       // too robotic
-      } else if (!util.twitter.acceptSource.test(util.removeHTML(tweet.source))) {
+      } else if (!util.twitter.acceptSource.test(util.parseLink(tweet.source).text)) {
         go.tweetStore.bot[tweet.id_str] = tweet;
       
       // too many retweets
@@ -118,11 +118,11 @@ var go = {
         go.tweetStore.rt[tweet.id_str] = tweet;
 
       // too direct of a reply
-      } else if (tweet.in_reply_to_status_id_str) {
+      } else if (tweet.in_reply_to_user_id_str) {
         go.tweetStore.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
-      } else if (go.tweetStore.users[tweet.user.id_str].count > go.cfg.maxPerUser) {
+      } else if (go.tweetStore.users[tweet.user.id_str].count - 1 > go.cfg.maxPerUser) {
         go.tweetStore.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
