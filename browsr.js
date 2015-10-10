@@ -64,9 +64,10 @@ var initBrowser = function(){
   $('#input').submit(function(e){
     e.preventDefault();
     $out.empty();
+    ga('send', 'event', 'user', 'submit', 'search', $search.val());
 
     var Twndr = new Go({
-      search: $('#search').val(),
+      search: $search.val(),
       afterGeo: initMap,
       processTweet: function(tweet) {
 
