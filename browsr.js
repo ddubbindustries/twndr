@@ -1,42 +1,51 @@
-var printWords = function(arr, template, charLength) {
-  var $printOut = $('<div/>'),
-      total = '';
+var print = {
+  facets: function(arr, itemTemplate) {
+    var $printOut = $('<div/>');
 
-  $.each(arr, function(i,v){
-    var idselectors = '#'+v.ids.join(', #');
+    $.each(arr, function(i,v){
+      var idselectors = '#'+v.ids.join(', #');
 
-    total += v.word + ' ';
-    if (total.length - 1 > charLength) return false;
+      $(itemTemplate(v)).addClass('facet').click(function(){
+        $('.text .hilight').contents().unwrap();
+        if ($(this).is('.hilight')) {
+          $('.tweet').show();
+          $('.hilight').removeClass('hilight');
 
-    $(template(v)).addClass('filterWord').click(function(){
-      $('.text .hilight').contents().unwrap();
-      if ($(this).is('.hilight')) {
-        $('.tweet').show();
-        $('.hilight').removeClass('hilight');
-
-        $.each(markers, function(id,marker){
-          marker.setVisible(true);
-        });
-      } else {
-        $('.hilight').removeClass('hilight');
-        $(this).addClass('hilight');
-        $('.tweet').hide()
-          .filter(idselectors).show()
-          .find('.text').html(function(i,html){
-            return html.replace(
-              new RegExp('\\b'+v.word+'\\b', 'ig'),
-              '<span class="hilight">$&</span>'
-            );
+          $.each(markers, function(id,marker){
+            marker.setVisible(true);
           });
+        } else {
+          $('.hilight').removeClass('hilight');
+          $(this).addClass('hilight');
+          $('.tweet').hide()
+            .filter(idselectors).show()
+            .find('.text').html(function(i,html){
+              return html.replace(
+                new RegExp('\\b'+v.word+'\\b', 'ig'),
+                '<span class="hilight">$&</span>'
+              );
+            });
 
-        $.each(markers, function(id,marker){
-          marker.setVisible(v.ids.indexOf(id) > -1);
-        });
-      }
-    }).appendTo($printOut);
-  });
+          $.each(markers, function(id,marker){
+            marker.setVisible(v.ids.indexOf(id) > -1);
+          });
+        }
+      }).appendTo($printOut);
+    });
 
-  return $printOut.contents();
+    return $printOut.contents();
+  },
+  facetColumn: function(name, content) {
+    return $('<div id="'+name+'" class="col"/>').append(
+      $('<div class="note"/>').html(name),
+      $('<ol class="freq scroll"/>').html(content)
+    );
+  },
+  fixHeader: function(){
+    var widths = [];
+    $('.tweet:eq(0) span').each(function(k,v){ widths.push($(v).width()); });
+    $.each(widths, function(k,v){ $('#tweetHead span').eq(k).width(v) });
+  }
 };
 
 var initBrowser = function(){
@@ -88,26 +97,33 @@ var initBrowser = function(){
         $stats.html((go.percentDone*100).toFixed()+'% of history ');
         $.each(go.tweetStore, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
 
-        $('#twend').html(printWords(go.topArr, function(v){
-          return '<span title="'+v.count+'">'+twemoji.parse(v.word)+'</span>';
-        }, go.cfg.twendLength));
-
-        $('#words').html(printWords(go.topArr, function(v){
-          return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
+        var total = '';
+        $('#twend').html(print.facets(go.topArr, function(v){
+          total += v.word + ' ';
+          return total.length < go.cfg.twendLength ? '<span>'+twemoji.parse(v.word)+'</span>' : false;
         }));
 
         var userTop = util.sortArr(util.objToArr(go.freq.user, 'word'), 'count');
-        $('#users').html(printWords(userTop, function(v){
-          return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
-        }));
+        var srcTop = util.sortArr(util.objToArr(go.freq.src, 'word'), 'count');
+
+        $('#facets').empty().append(
+          print.facetColumn('words', print.facets(go.topArr, function(v){
+            return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
+          })),
+
+          print.facetColumn('users', print.facets(userTop, function(v){
+            return '<li>'+v.word+' '+v.count+'</li>';
+          })),
+
+          print.facetColumn('src', print.facets(srcTop, function(v){
+            return '<li>'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
+          }))
+        );
       },
       afterAll: function(go) {
         util.local.store('cfg', go.cfg);
 
-        //equalize table header
-        var widths = [];
-        $('.tweet:eq(0) span').each(function(k,v){ widths.push($(v).width()); });
-        $.each(widths, function(k,v){ $('#tweetHead span').eq(k).width(v) });
+        print.fixHeader();
 
         $('.tweet').click(function(){
           var thisId = $(this).attr('id'),

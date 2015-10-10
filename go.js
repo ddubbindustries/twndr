@@ -30,8 +30,8 @@ var go = {
     afterBatch: function(){console.log('afterBatch');},
     afterAll: function(){console.log('afterAll');}
   },
-  init: function(args){ 
-    console.time('total time');    
+  init: function(args){
+    console.time('total time');
     lex.init();
     go.cfg.startTime = new Date().getTime();
     $.each(args || {}, function(k,v) {
@@ -43,7 +43,7 @@ var go = {
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg);
     go.parseSearch(go.cfg.search);
-    go.getGeo(go.cfg.locale, function(coords) { 
+    go.getGeo(go.cfg.locale, function(coords) {
       go.cfg.api.geocode = [coords[1], coords[0], go.cfg.radius].join(',');
       go.cfg.afterGeo(go.cfg.api.geocode);
       go.getAPI('/search/tweets', go.cfg.api, go.router);
@@ -90,19 +90,19 @@ var go = {
         batchResponseTime = new Date() - go.apiStartTime;
 
     console.log('got batch in', batchResponseTime+'ms');
-    
+
     $.each(arr, function(i, tweet){
       hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
       tweet._delay = i * 20;
-     
+
       // too old
       if (hoursRelative < -go.cfg.hoursHistory) {
         return false;
-      
+
       // too robotic
       } else if (!util.twitter.acceptSource.test(util.parseLink(tweet.source).text)) {
         go.tweetStore.bot[tweet.id_str] = tweet;
-      
+
       // too many retweets
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
         go.tweetStore.rt[tweet.id_str] = tweet;
@@ -122,9 +122,9 @@ var go = {
       // just right!
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
-      
-        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str); 
-        util.tally(go.freq.src, util.parseLink(tweet.source).text, tweet.id_str); 
+
+        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str);
+        util.tally(go.freq.src, tweet.source, tweet.id_str); 
 
         go.cfg.processTweet(tweet);
         go.tweetStore.ok[tweet.id_str] = tweet;
@@ -133,7 +133,7 @@ var go = {
     console.timeEnd('process');
     go.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
-  afterBatch: function() { 
+  afterBatch: function() {
     lex.afterChunks(function(word){
       return !util.isInString(word.replace(/^#/g, ''), util.getFullGeo(go.cfg.locale));
     });
@@ -144,11 +144,11 @@ var go = {
   router: function(data){
     var nextPage = false;
     if (data.statuses.length) {
-      go.process(data.statuses), 
-      go.afterBatch(); 
+      go.process(data.statuses),
+      go.afterBatch();
       nextPage = data.search_metadata.next_results;
     }
-    
+
     if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
@@ -167,4 +167,3 @@ var go = {
 };
 
 if (typeof module !== 'undefined') module.exports = Go;
-
