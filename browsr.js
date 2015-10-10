@@ -90,7 +90,7 @@ var initBrowser = function(){
 
         $('#twend').html(printWords(go.topArr, function(v){
           return '<span title="'+v.count+'">'+twemoji.parse(v.word)+'</span>';
-        }, cfg.twendLength));
+        }, go.cfg.twendLength));
 
         $('#words').html(printWords(go.topArr, function(v){
           return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
@@ -106,23 +106,19 @@ var initBrowser = function(){
 
         //equalize table header
         var widths = [];
-        $('.tweet:eq(0) span').each(function(k,v){ widths.push($(v).width()); }); 
+        $('.tweet:eq(0) span').each(function(k,v){ widths.push($(v).width()); });
         $.each(widths, function(k,v){ $('#tweetHead span').eq(k).width(v) });
 
         $('.tweet').click(function(){
           var thisId = $(this).attr('id'),
               tweet = go.tweetStore.ok[thisId];
           console.log('this tweet', tweet);
-          /*$.each(markers, function(id,marker){
-            marker.setVisible(id == thisId);
-          });*/
         }).mouseenter(function(){
           markers[$(this).attr('id')].setAnimation(google.maps.Animation.BOUNCE);
         }).mouseout(function(){
           markers[$(this).attr('id')].setAnimation(null);
         });
-        console.log('all done! tweetStore:', go.tweetStore);
-        freq = go.freq; // for messing with in console
+        console.log('all done! tweetStore:', go.twend, go.tweetStore);
       }
     });
   }).submit();
