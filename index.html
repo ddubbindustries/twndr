@@ -23,20 +23,26 @@ Released under the MIT license: http://jsbin.mit-license.org
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div id="map-canvas"></div>
-  <div id="upper">
-    <form id="input">
-      <input id="search" type="text">
-      <input id="go" type="submit" value="Go">
-      <input id="cache" type="button" value="Clear Cache & Go">
-    </form>
-    <div id="stats" class="note"></div>
-    <div id="twend"></div>
-  </div>
-  <div id="facets" class="col"></div>
-  <div class="col">
-    <div id="tweetHead" class="note row"></div>
-    <div id="out" class="scroll"></div>
+  <div class="row">
+    <div class="col">
+      <div id="upper">
+        <form id="input">
+          <input id="search" type="text">
+          <input id="go" type="submit" value="Go">
+          <input id="cache" type="button" value="Clear Cache & Go">
+        </form>
+        <div id="stats" class="note"></div>
+        <div id="twend"></div>
+      </div>
+      <div id="lower" class="row">
+        <div id="facets" class="col"></div>
+        <div id="tweetTable" class="col">
+          <div id="tweetHead" class="note row"></div>
+          <div id="out" class="scroll"></div>
+        </div>
+      </div>
+    </div>
+    <div id="map-canvas" class="col"></div>
   </div>
 </body>
 </html>

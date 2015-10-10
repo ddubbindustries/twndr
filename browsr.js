@@ -103,16 +103,21 @@ var initBrowser = function(){
           return total.length < go.cfg.twendLength ? '<span>'+twemoji.parse(v.word)+'</span>' : false;
         }));
 
-        var userTop = util.sortArr(util.objToArr(go.freq.user, 'word'), 'count');
-        var srcTop = util.sortArr(util.objToArr(go.freq.src, 'word'), 'count');
+        var userTop = util.sortArr(util.objToArr(go.freq.user, 'word'), 'count'),
+            srcTop = util.sortArr(util.objToArr(go.freq.src, 'word'), 'count'),
+            hashTop = go.topArr.filter(function(a){ return /^#/.test(a.word);});
 
         $('#facets').empty().append(
           print.facetColumn('words', print.facets(go.topArr, function(v){
             return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
 
-          print.facetColumn('users', print.facets(userTop, function(v){
+          print.facetColumn('hashtags', print.facets(hashTop, function(v){
             return '<li>'+v.word+' '+v.count+'</li>';
+          })),
+
+          print.facetColumn('users', print.facets(userTop, function(v){
+            return '<li><img title="'+v.word+'" src="'+go.freq.user[v.word].meta.profile_image_url+'"> '+v.count+'</li>';
           })),
 
           print.facetColumn('src', print.facets(srcTop, function(v){
@@ -135,6 +140,7 @@ var initBrowser = function(){
           markers[$(this).attr('id')].setAnimation(null);
         });
         console.log('all done! tweetStore:', go.twend, go.tweetStore);
+        freq = go.freq;
       }
     });
   }).submit();

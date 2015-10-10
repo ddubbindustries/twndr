@@ -7,7 +7,6 @@ a {
 #map-canvas {
   height: 500px;
   width: 500px;
-  float: right;
 }
 #upper {
   text-align: center;
@@ -27,6 +26,9 @@ a {
 #twend span {
   display: inline-block;
 }
+.row {
+  display: table-row;
+}
 .col {
   display: table-cell;
   padding-right: 1em;
@@ -35,22 +37,27 @@ a {
   margin: 0;
   padding: 0;
   list-style-type: none;
+  max-width: 7em;
 }
 .freq li {
   white-space: nowrap;
 }
+.freq img {
+  vertical-align: middle;
+}
 .scroll {
   height: 500px;
+  padding-right: 1em;
   overflow: hidden;
   overflow-y: auto;
 }
 .facet:hover, .hilight {
   background: lightSalmon;
+  border-radius: 0.3em;
   padding: 0.15em;
 }
 .facet {
   cursor: pointer;
-  border-radius: 0.3em;
   padding: 0.15em;
 }
 .row {

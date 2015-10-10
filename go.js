@@ -123,8 +123,8 @@ var go = {
       } else {
         lex.addChunk(tweet.text, tweet.id_str);
 
-        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str);
-        util.tally(go.freq.src, tweet.source, tweet.id_str); 
+        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str, tweet.user);
+        util.tally(go.freq.src, tweet.source, tweet.id_str);
 
         go.cfg.processTweet(tweet);
         go.tweetStore.ok[tweet.id_str] = tweet;
