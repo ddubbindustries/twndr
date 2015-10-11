@@ -32,7 +32,6 @@ var go = {
   },
   init: function(args){
     console.time('total time');
-    lex.init();
     go.cfg.startTime = new Date().getTime();
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
@@ -49,8 +48,12 @@ var go = {
       go.getAPI('/search/tweets', go.cfg.api, go.router);
     });
   },
-  parseSearch: function(search) {
-    var parsed = util.twitter.parseQuery(search);
+  parseSearch: function(text) {
+    var parsed = {
+      locale: util.safeMatch(/[a-z\s\.]{2,}\,\s?[a-z]{2,}/i, text),
+      distance: util.safeMatch(/[0-9]{1,}(mi|km)/, text),
+      time: util.safeMatch(/[0-9]{1,}hr/, text)
+    };
     go.cfg.hoursHistory = parseInt(parsed.time.replace('hr','')) || go.cfg.hoursHistory;
     go.cfg.locale = parsed.locale || go.cfg.locale;
     go.cfg.radius = parsed.distance || go.cfg.radius;
@@ -85,11 +88,11 @@ var go = {
     });
   },
   process: function(arr) {
-    console.time('process');
     var hoursRelative = 0,
         batchResponseTime = new Date() - go.apiStartTime;
 
     console.log('got batch in', batchResponseTime+'ms');
+    console.time('process');
 
     $.each(arr, function(i, tweet){
       hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
@@ -134,11 +137,10 @@ var go = {
     go.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
   afterBatch: function() {
-    lex.afterChunks(function(word){
-      return !util.isInString(word.replace(/^#/g, ''), util.getFullGeo(go.cfg.locale));
-    });
-    go.topArr = lex.meta.topArr;
-    go.twend = lex.output.popular({maxChars: go.cfg.twendLength});
+    go.topArr = lex.getTop(function(v){
+        return (!lex.isCommon(v.word) && v.count > 1);
+      });
+    go.twend = lex.getString(go.topArr, go.cfg.twendLength);
     go.cfg.afterBatch(go);
   },
   router: function(data){

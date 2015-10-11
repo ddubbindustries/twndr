@@ -105,7 +105,7 @@ var initBrowser = function(){
         var total = '';
         $('#twend').html(print.facets(go.topArr, function(v){
           total += v.word + ' ';
-          return total.length < go.cfg.twendLength ? '<span>'+twemoji.parse(v.word)+'</span>' : false;
+          return total.length <= go.cfg.twendLength ? '<span>'+twemoji.parse(v.word)+'</span>' : false;
         }));
 
         var userTop = util.sortArr(util.objToArr(go.freq.user, 'word'), 'count'),
@@ -145,6 +145,7 @@ var initBrowser = function(){
           markers[$(this).attr('id')].setAnimation(null);
         });
         console.log('all done! tweetStore:', go.twend, go.tweetStore);
+        console.log('twend', go.twend);
         freq = go.freq;
       }
     });
