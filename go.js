@@ -36,7 +36,8 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetStore = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+    go.tweetsRaw = util.local.get(go.cfg.api.geocode) || {statuses:[]};
+    go.tweetsProc = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
     go.freq = {user: {}, src: {}};
     go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
@@ -74,7 +75,8 @@ var go = {
   getAPI: function(path, params, callback) {
     go.apiStartTime = new Date();
     var key = path + '?'+ (typeof params == 'object' ? $.param(params) : params);
-    if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
+    if (go.cfg.cache && localStorage && localStorage[params.geocode]) return callback(util.local.get(params.geocode));
+    //if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
     $.ajax({
       dataType: 'JSONP',
       url: go.cfg.url+key,
@@ -82,7 +84,9 @@ var go = {
         console.log('got '+util.getFileSize(data), go.apiCallCount--, 'api calls to go');
         //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
-        if (go.cfg.cache) util.local.store(key, data);
+        go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses);
+        console.log('raw', go.tweetsRaw.statuses.length, go.tweetsRaw);
+        //if (go.cfg.cache) util.local.store(key, data);
       },
       error: go.errorHandler
     });
@@ -114,23 +118,23 @@ var go = {
 
       // too robotic
       } else if (!util.twitter.acceptSource.test(util.parseLink(tweet.source).text)) {
-        go.tweetStore.bot[tweet.id_str] = tweet;
+        go.tweetsProc.bot[tweet.id_str] = tweet;
 
       // too many retweets
       } else if (tweet.retweet_count > go.cfg.maxRetweet) {
-        go.tweetStore.rt[tweet.id_str] = tweet;
+        go.tweetsProc.rt[tweet.id_str] = tweet;
 
       // too direct of a reply
       } else if (tweet.in_reply_to_user_id_str) {
-        go.tweetStore.reply[tweet.id_str] = tweet;
+        go.tweetsProc.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
       } else if (go.freq.user[tweet.user.screen_name] && go.freq.user[tweet.user.screen_name].count > go.cfg.maxPerUser) {
-        go.tweetStore.chatty[tweet.id_str] = tweet;
+        go.tweetsProc.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
       } else if (!tweet.geo) {
-        go.tweetStore.nogeo[tweet.id_str] = tweet;
+        go.tweetsProc.nogeo[tweet.id_str] = tweet;
 
       // just right!
       } else {
@@ -140,7 +144,7 @@ var go = {
         util.tally(go.freq.src, tweet.source, tweet.id_str);
 
         go.cfg.processTweet(tweet);
-        go.tweetStore.ok[tweet.id_str] = tweet;
+        go.tweetsProc.ok[tweet.id_str] = tweet;
       }
     });
     console.timeEnd('process');
