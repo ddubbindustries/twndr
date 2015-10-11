@@ -88,15 +88,25 @@ var go = {
     });
   },
   process: function(arr) {
-    var hoursRelative = 0,
-        batchResponseTime = new Date() - go.apiStartTime;
+    var tweetTime = 0,
+        hoursRelative = 0,
+        firstTweetTime = new Date(arr[0].created_at),
+        lastTweetTime = new Date(arr[arr.length-1].created_at),
+        batchTimeRange = lastTweetTime - firstTweetTime,
+        percentOfBatch = 0,
+        batchResponseTime = new Date() - go.apiStartTime,
+        interpolatedTime = 0;
 
     console.log('got batch in', batchResponseTime+'ms');
     console.time('process');
 
     $.each(arr, function(i, tweet){
-      hoursRelative = (new Date(tweet.created_at) - go.cfg.startTime) / 3600000;
-      tweet._delay = i * 20;
+      tweetTime = new Date(tweet.created_at).getTime();
+      hoursRelative = (tweetTime - go.cfg.startTime) / 3600000;
+      percentOfBatch = (tweetTime - firstTweetTime) / batchTimeRange;
+      interpolatedTime = (percentOfBatch * batchResponseTime).toFixed();
+
+      tweet._delay = interpolatedTime * 3;
 
       // too old
       if (hoursRelative < -go.cfg.hoursHistory) {
