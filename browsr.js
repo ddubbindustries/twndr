@@ -100,7 +100,7 @@ var initBrowser = function(){
       },
       afterBatch: function(go){
         $stats.html((go.percentDone*100).toFixed()+'% of history ');
-        $.each(go.tweetStore, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
+        $.each(go.tweetsProc, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
 
         var total = '';
         $('#twend').html(print.facets(go.topArr, function(v){
@@ -137,14 +137,14 @@ var initBrowser = function(){
 
         $('.tweet').click(function(){
           var thisId = $(this).attr('id'),
-              tweet = go.tweetStore.ok[thisId];
+              tweet = go.tweetsProc.ok[thisId];
           console.log('this tweet', tweet);
         }).mouseenter(function(){
           markers[$(this).attr('id')].setAnimation(google.maps.Animation.BOUNCE);
         }).mouseout(function(){
           markers[$(this).attr('id')].setAnimation(null);
         });
-        console.log('all done! tweetStore:', go.twend, go.tweetStore);
+        console.log('all done! tweetsProc:', go.twend, go.tweetsProc);
         console.log('twend', go.twend);
         freq = go.freq;
       }
