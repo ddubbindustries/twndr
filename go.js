@@ -36,8 +36,8 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetsRaw = util.local.get(go.cfg.api.geocode) || {statuses:[]};
-    go.tweetsProc = {ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+    go.tweetsRaw = util.local.get(go.cfg.search) || {statuses:[]};
+    go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
     go.freq = {user: {}, src: {}};
     go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
@@ -75,7 +75,7 @@ var go = {
   getAPI: function(path, params, callback) {
     go.apiStartTime = new Date();
     var key = path + '?'+ (typeof params == 'object' ? $.param(params) : params);
-    if (go.cfg.cache && localStorage && localStorage[params.geocode]) return callback(util.local.get(params.geocode));
+    if (go.cfg.cache && localStorage && localStorage[go.cfg.search]) return callback(util.local.get(go.cfg.search));
     //if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
     $.ajax({
       dataType: 'JSONP',
@@ -115,9 +115,12 @@ var go = {
       // too old
       if (hoursRelative < -go.cfg.hoursHistory) {
         return false;
+      } else {
+        go.tweetsProc.raw[tweet.id_str] = tweet;
+      }
 
       // too robotic
-      } else if (!util.twitter.acceptSource.test(util.parseLink(tweet.source).text)) {
+      if (!util.twitter.acceptSource.test(util.parseLink(tweet.source).text)) {
         go.tweetsProc.bot[tweet.id_str] = tweet;
 
       // too many retweets
@@ -174,7 +177,7 @@ var go = {
   afterAll: function() {
     console.timeEnd('total time');
     go.cfg.afterAll(go);
-    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.api.geocode, go.tweetsRaw);
+    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.search, go.tweetsRaw);
   },
   errorHandler: function(err){
     $('#twend').text(JSON.stringify(err, null, 2));
