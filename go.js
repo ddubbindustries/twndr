@@ -150,6 +150,20 @@ var go = {
     console.timeEnd('process');
     go.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
+  router: function(data){
+    if (data.statuses.length) {
+      go.process(data.statuses),
+      go.afterBatch();
+    }
+
+    var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
+
+    if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
+      go.getAPI('/search/tweets', nextPage.slice(1), go.router);
+    } else {
+      go.afterAll();
+    }
+  },
   afterBatch: function() {
     go.topArr = lex.getTop(function(v){
         return (!lex.isCommon(v.word) && v.count > 1);
@@ -157,20 +171,10 @@ var go = {
     go.twend = lex.getString(go.topArr, go.cfg.twendLength);
     go.cfg.afterBatch(go);
   },
-  router: function(data){
-    var nextPage = false;
-    if (data.statuses.length) {
-      go.process(data.statuses),
-      go.afterBatch();
-      nextPage = data.search_metadata.next_results;
-    }
-
-    if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
-      go.getAPI('/search/tweets', nextPage.slice(1), go.router);
-    } else {
-      console.timeEnd('total time');
-      go.cfg.afterAll(go);
-    }
+  afterAll: function() {
+    console.timeEnd('total time');
+    go.cfg.afterAll(go);
+    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.api.geocode, go.tweetsRaw);
   },
   errorHandler: function(err){
     $('#twend').text(JSON.stringify(err, null, 2));
