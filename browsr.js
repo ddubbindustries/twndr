@@ -48,9 +48,7 @@ var print = {
 
 var initCfg = {
   search: 'Blacksburg, VA 5mi 48hr',
-  maxRetweet: 25,
-  maxPerUser: 10,
-  twendLength: 140,
+  twendLength: 140
 };
 
 var initBrowser = function(){
@@ -66,6 +64,7 @@ var initBrowser = function(){
 
     var Twndr = new Go({
       search: $search.val(),
+      maxPerUser: 10,
       afterGeo: initMap,
       processTweet: function(tweet) {
 
@@ -140,7 +139,6 @@ var initBrowser = function(){
           markers[$(this).attr('id')].setAnimation(null);
         });
         console.log('all done! tweetsProc:', go.twend, go.tweetsProc);
-        console.log('twend', go.twend);
         freq = go.freq;
       }
     });

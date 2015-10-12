@@ -18,9 +18,10 @@ var go = {
       lang: 'en',
       count: 100
     },
-    apiMax: 10,
+    apiMax: 20,
     cache: true,
     maxRetweet: 10,
+    maxPerUser: 10,
     locale: 'Blacksburg, VA',
     radius: '5mi',
     hoursHistory: 48,
@@ -36,7 +37,7 @@ var go = {
     $.each(args || {}, function(k,v) {
       go.cfg[k] = v;
     });
-    go.tweetsRaw = util.local.get(go.cfg.search) || {statuses:[]};
+    go.tweetsRaw = util.local.get(go.cfg.api.geocode) || {statuses:[]};
     go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
 
     go.freq = {
@@ -82,7 +83,7 @@ var go = {
   getAPI: function(path, params, callback) {
     go.apiStartTime = new Date();
     var key = path + '?'+ (typeof params == 'object' ? $.param(params) : params);
-    if (go.cfg.cache && localStorage && localStorage[go.cfg.search]) return callback(util.local.get(go.cfg.search));
+    if (go.cfg.cache && localStorage && localStorage[go.cfg.api.geocode]) return callback(util.local.get(go.cfg.api.geocode));
     //if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
     $.ajax({
       dataType: 'JSONP',
@@ -91,7 +92,8 @@ var go = {
         console.log('got '+util.getFileSize(data), go.apiCallCount--, 'api calls to go');
         //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
-        go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses);
+        //go.tweetsRaw.search_metadata = data.search_metadata,
+        go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses)
         //if (go.cfg.cache) util.local.store(key, data);
       },
       error: go.errorHandler
@@ -138,7 +140,10 @@ var go = {
         go.tweetsProc.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
-    } else if (go.freq.users.list[tweet.user.screen_name] && go.freq.users.list[tweet.user.screen_name].count > go.cfg.maxPerUser) {
+      } else if (
+        go.freq.users.list['@'+tweet.user.screen_name] &&
+        go.freq.users.list['@'+tweet.user.screen_name].count >= go.cfg.maxPerUser
+      ) {
         go.tweetsProc.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
@@ -174,7 +179,7 @@ var go = {
   },
   afterBatch: function() {
     go.freq.words.topArr = go.freq.words.getTop(function(v){
-      return v.count > 1 && 
+      return v.count > 1 &&
         !util.isCommon(v.word) &&
         !/^@/.test(v.word) &&
         !util.isInString(v.word, util.getFullGeo(go.cfg.locale));
@@ -186,15 +191,13 @@ var go = {
       return /^#/.test(a.word);
     });
 
-    console.log('freq', go.freq);
-
     go.twend = go.freq.words.getTopSeries(go.freq.words.topArr, go.cfg.twendLength);
     go.cfg.afterBatch(go);
   },
   afterAll: function() {
     console.timeEnd('total time');
     go.cfg.afterAll(go);
-    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.search, go.tweetsRaw);
+    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.api.geocode, go.tweetsRaw);
   },
   errorHandler: function(err){
     $('#twend').text(JSON.stringify(err, null, 2));
