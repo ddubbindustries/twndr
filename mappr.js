@@ -6,7 +6,6 @@ var initMap = function(geocode, moveZone) {
   map = new google.maps.Map(document.getElementById("map-canvas"),{
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     streetViewControl: false,
-    zoomControl: false,
     mapTypeControl: false
   });
 
