@@ -146,7 +146,6 @@ var initBrowser = function(){
 
   $('#cache').click(function(){
     localStorage.clear();
-    $('#input').submit();
   });
 };
 
