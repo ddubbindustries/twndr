@@ -20,10 +20,8 @@ var print = {
           $('.tweet').hide()
             .filter(idselectors).show()
             .find('.text').html(function(i,html){
-              return html.replace(
-                new RegExp('\\b'+v.word+'\\b', 'ig'),
-                '<span class="hilight">$&</span>'
-              );
+              var rgx = /^\W/.test(v.word) ? v.word : '\\b'+v.word+'\\b';
+              return html.replace(new RegExp(rgx, 'ig'), '<span class="hilight">$&</span>');
             });
 
           $.each(markers, function(id,marker){
