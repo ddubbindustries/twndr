@@ -38,10 +38,14 @@ var go = {
     });
     go.tweetsRaw = util.local.get(go.cfg.search) || {statuses:[]};
     go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+
+    go.words = new Lex('words');
     go.freq = {user: {}, src: {}};
+
     go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
     console.log('set globals go.cfg', go.cfg);
+
     go.parseSearch(go.cfg.search);
     go.getGeo(go.cfg.locale, function(coords) {
       go.cfg.api.geocode = [coords[1], coords[0], go.cfg.radius].join(',');
@@ -141,7 +145,7 @@ var go = {
 
       // just right!
       } else {
-        lex.addChunk(tweet.text, tweet.id_str);
+        go.words.addChunk(tweet.text, tweet.id_str);
 
         util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str, tweet.user);
         util.tally(go.freq.src, tweet.source, tweet.id_str);
@@ -168,10 +172,10 @@ var go = {
     }
   },
   afterBatch: function() {
-    go.topArr = lex.getTop(function(v){
-        return (!lex.isCommon(v.word) && v.count > 1);
+    go.topArr = go.words.getTop(function(v){
+        return (!go.words.isCommon(v.word) && v.count > 1);
       });
-    go.twend = lex.getString(go.topArr, go.cfg.twendLength);
+    go.twend = go.words.getTopSeries(go.topArr, go.cfg.twendLength);
     go.cfg.afterBatch(go);
   },
   afterAll: function() {
