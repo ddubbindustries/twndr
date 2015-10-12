@@ -39,8 +39,11 @@ var go = {
     go.tweetsRaw = util.local.get(go.cfg.search) || {statuses:[]};
     go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
 
-    go.words = new Lex('words');
-    go.freq = {user: {}, src: {}};
+    go.freq = {
+      words: new Lex(),
+      users: new Lex(),
+      sources: new Lex()
+    };
 
     go.twend = 'no tweets found';
     go.apiCallCount = go.cfg.apiMax;
@@ -89,7 +92,6 @@ var go = {
         //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
         go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses);
-        console.log('raw', go.tweetsRaw.statuses.length, go.tweetsRaw);
         //if (go.cfg.cache) util.local.store(key, data);
       },
       error: go.errorHandler
@@ -136,7 +138,7 @@ var go = {
         go.tweetsProc.reply[tweet.id_str] = tweet;
 
       // too chatty of a user
-      } else if (go.freq.user[tweet.user.screen_name] && go.freq.user[tweet.user.screen_name].count > go.cfg.maxPerUser) {
+    } else if (go.freq.users.list[tweet.user.screen_name] && go.freq.users.list[tweet.user.screen_name].count > go.cfg.maxPerUser) {
         go.tweetsProc.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
@@ -145,10 +147,9 @@ var go = {
 
       // just right!
       } else {
-        go.words.addChunk(tweet.text, tweet.id_str);
-
-        util.tally(go.freq.user, '@'+tweet.user.screen_name, tweet.id_str, tweet.user);
-        util.tally(go.freq.src, tweet.source, tweet.id_str);
+        go.freq.words.addChunk(tweet.text, tweet.id_str);
+        go.freq.users.tally('@'+tweet.user.screen_name, tweet.id_str, tweet.user);
+        go.freq.sources.tally(tweet.source, tweet.id_str);
 
         go.cfg.processTweet(tweet);
         go.tweetsProc.ok[tweet.id_str] = tweet;
@@ -172,10 +173,22 @@ var go = {
     }
   },
   afterBatch: function() {
-    go.topArr = go.words.getTop(function(v){
-        return (!go.words.isCommon(v.word) && v.count > 1);
-      });
-    go.twend = go.words.getTopSeries(go.topArr, go.cfg.twendLength);
+    go.freq.words.topArr = go.freq.words.getTop(function(v){
+      return v.count > 1 && 
+        !util.isCommon(v.word) &&
+        !/^@/.test(v.word) &&
+        !util.isInString(v.word, util.getFullGeo(go.cfg.locale));
+    });
+    go.freq.users.topArr = go.freq.users.getTop();
+    go.freq.sources.topArr = go.freq.sources.getTop();
+    go.freq.hashes = {};
+    go.freq.hashes.topArr = go.freq.words.topArr.filter(function(a){
+      return /^#/.test(a.word);
+    });
+
+    console.log('freq', go.freq);
+
+    go.twend = go.freq.words.getTopSeries(go.freq.words.topArr, go.cfg.twendLength);
     go.cfg.afterBatch(go);
   },
   afterAll: function() {
