@@ -71,6 +71,7 @@ var go = {
     if (typeof getGoogleCoords == 'function') {
       getGoogleCoords(locale, function(data){
         var coords = data[0].geometry.location;
+        go.cfg.fullGeo = util.getFullGeo(data[0].address_components);
         success([coords.lng(), coords.lat()]);
       });
     } else {
