@@ -6,6 +6,7 @@ var print = {
       var idselectors = '#'+v.ids.join(', #');
 
       $(itemTemplate(v)).addClass('facet').click(function(){
+        console.log('facet', v);
         $('.text .hilight').contents().unwrap();
         if ($(this).is('.hilight')) {
           $('.tweet').show();
@@ -96,6 +97,8 @@ var initBrowser = function(){
         }
       },
       afterBatch: function(go){
+        console.time('print');
+
         $stats.html((go.percentDone*100).toFixed()+'% of history ');
         $.each(go.tweetsProc, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
 
@@ -123,6 +126,7 @@ var initBrowser = function(){
             return '<li>'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
           }))
         );
+        console.timeEnd('print');
       },
       afterAll: function(go) {
         util.local.store('cfg', go.cfg);

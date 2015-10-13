@@ -111,7 +111,7 @@ var go = {
         batchResponseTime = new Date() - go.apiStartTime,
         interpolatedTime = 0;
 
-    console.log('got batch in', batchResponseTime+'ms');
+    console.timeEnd('get');
     console.time('process');
 
     $.each(arr, function(i, tweet){
@@ -162,7 +162,6 @@ var go = {
         go.tweetsProc.ok[tweet.id_str] = tweet;
       }
     });
-    console.timeEnd('process');
     go.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
   router: function(data){
@@ -194,6 +193,7 @@ var go = {
     });
 
     go.twend = go.freq.words.getTopSeries(go.freq.words.topArr, go.cfg.twendLength);
+    console.timeEnd('process');
     go.cfg.afterBatch(go);
   },
   afterAll: function() {
