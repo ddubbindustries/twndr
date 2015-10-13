@@ -83,8 +83,10 @@ var go = {
   getAPI: function(path, params, callback) {
     go.apiStartTime = new Date();
     var key = path + '?'+ (typeof params == 'object' ? $.param(params) : params);
-    if (go.cfg.cache && localStorage && localStorage[go.cfg.api.geocode]) return callback(util.local.get(go.cfg.api.geocode));
-    //if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
+    console.time('get'); console.log('getting', key);
+
+    //if (go.cfg.cache && localStorage && localStorage[go.cfg.api.geocode]) return callback(util.local.get(go.cfg.api.geocode));
+    if (go.cfg.cache && localStorage && localStorage[key]) return callback(util.local.get(key));
     $.ajax({
       dataType: 'JSONP',
       url: go.cfg.url+key,
@@ -93,8 +95,8 @@ var go = {
         //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
         //go.tweetsRaw.search_metadata = data.search_metadata,
-        go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses)
-        //if (go.cfg.cache) util.local.store(key, data);
+        //go.tweetsRaw.statuses = go.tweetsRaw.statuses.concat(data.statuses)
+        if (go.cfg.cache) util.local.store(key, data);
       },
       error: go.errorHandler
     });
