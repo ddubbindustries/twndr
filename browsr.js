@@ -17,12 +17,18 @@ var print = {
         } else {
           $('.hilight').removeClass('hilight');
           $(this).addClass('hilight');
-          $('.tweet').hide()
-            .filter(idselectors).show()
-            .find('.text').html(function(i,html){
-              var rgx = /^\W/.test(v.word) ? v.word : '\\b'+v.word+'\\b';
+          var $text = $('.tweet').hide().filter(idselectors).show().find('.text'),
+              $img = $text.find('[alt="'+v.word+'"]');
+
+          if ($img.length) {
+            $img.wrap('<span class="hilight"></span>');
+          } else {
+            $text.html(function(i,html){
+              var rgx = v.forms ? v.forms.map(function(v){return '\\b'+v+'\\b';}).join('|') : v.word;
               return html.replace(new RegExp(rgx, 'ig'), '<span class="hilight">$&</span>');
             });
+          }
+
           if (cfg.viz) $.each(markers, function(id,marker){ marker.setVisible(v.ids.indexOf(id) > -1); });
 
         }
