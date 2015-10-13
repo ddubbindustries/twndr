@@ -12,9 +12,8 @@ var print = {
           $('.tweet').show();
           $('.hilight').removeClass('hilight');
 
-          $.each(markers, function(id,marker){
-            marker.setVisible(true);
-          });
+          if (cfg.viz) $.each(markers, function(id,marker){ marker.setVisible(true); });
+
         } else {
           $('.hilight').removeClass('hilight');
           $(this).addClass('hilight');
@@ -24,10 +23,8 @@ var print = {
               var rgx = /^\W/.test(v.word) ? v.word : '\\b'+v.word+'\\b';
               return html.replace(new RegExp(rgx, 'ig'), '<span class="hilight">$&</span>');
             });
+          if (cfg.viz) $.each(markers, function(id,marker){ marker.setVisible(v.ids.indexOf(id) > -1); });
 
-          $.each(markers, function(id,marker){
-            marker.setVisible(v.ids.indexOf(id) > -1);
-          });
         }
       }).appendTo($printOut);
     });
@@ -48,28 +45,32 @@ var print = {
 };
 
 var initCfg = {
-  search: 'Blacksburg, VA 5mi 48hr',
-  twendLength: 140
-};
+    search: 'Blacksburg, VA 5mi 48hr',
+    viz: false
+  },
+  cfg = $.extend(initCfg, util.local.get('cfg'));
 
 var initBrowser = function(){
-  var cfg = util.local.get('cfg') || initCfg,
-      $out = $('#out'),
+  var $out = $('#out'),
       $stats = $('#stats'),
       $search = $('#search').val(cfg.search);
 
   $('#input').submit(function(e){
     e.preventDefault();
+    cfg.search = $search.val();
+    util.local.store('cfg', cfg);
+
     $out.empty();
     ga('send', 'event', 'user', 'submit', 'search', $search.val());
 
     var Twndr = new Go({
-      search: $search.val(),
-      maxPerUser: 10,
-      afterGeo: initMap,
+      search: cfg.search,
+      afterGeo: function(geocode) {
+        if (cfg.viz) { initMap(geocode); } else { $('#map-canvas').hide(); }
+      },
       processTweet: function(tweet) {
 
-        if (tweet.geo) setTimeout(addMarker, tweet._delay || 0, tweet);
+        if (cfg.viz && tweet.geo) setTimeout(addMarker, tweet._delay || 0, tweet);
 
         var hoursRelative = util.getHoursAgo(tweet.created_at),
             userlink = 'http://twitter.com/'+tweet.user.screen_name,
@@ -133,19 +134,17 @@ var initBrowser = function(){
         console.timeEnd('print');
       },
       afterAll: function(go) {
-        util.local.store('cfg', go.cfg);
 
         print.fixHeader();
 
         $('.tweet').click(function(){
-          var thisId = $(this).attr('id'),
-              tweet = go.tweetsProc.ok[thisId];
-          console.log('this tweet', tweet);
+          console.log('this tweet', go.tweetsProc.ok[$(this).attr('id')]);
         }).mouseenter(function(){
-          markers[$(this).attr('id')].setAnimation(google.maps.Animation.BOUNCE);
+          if (cfg.viz) markers[$(this).attr('id')].setAnimation(google.maps.Animation.BOUNCE);
         }).mouseout(function(){
-          markers[$(this).attr('id')].setAnimation(null);
+          if (cfg.viz) markers[$(this).attr('id')].setAnimation(null);
         });
+
         console.log('all done! tweetsProc:', go.twend, go.tweetsProc);
         freq = go.freq;
       }

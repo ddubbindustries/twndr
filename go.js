@@ -26,7 +26,7 @@ var go = {
     radius: '5mi',
     hoursHistory: 48,
     search: 'Blacksburg, VA 5mi 48hr',
-    twendLength: 130,
+    twendLength: 140,
     afterGeo: function(){console.log('afterGeo');},
     afterBatch: function(){console.log('afterBatch');},
     afterAll: function(){console.log('afterAll');}
