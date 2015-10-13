@@ -71,7 +71,7 @@ var go = {
     if (typeof getGoogleCoords == 'function') {
       getGoogleCoords(locale, function(data){
         var coords = data[0].geometry.location;
-        success([coords.M, coords.J]); // not sure why it's these arbitrary keys, pure compression for speed?
+        success([coords.lng(), coords.lat()]);
       });
     } else {
       go.getAPI('/geo/search', {query: locale}, function(data) {
