@@ -201,9 +201,17 @@ var go = {
     go.freq.combos = $.extend(true, {}, go.freq.words);
     go.freq.combos.list = go.freq.combos.filterList(wordFilter);
 
-    $.each(go.freq.combos.list, function(k,v) {
-      if (go.freq.combos.list[k+'s']) go.freq.combos.merge(k+'s', k);
-      if (go.freq.combos.list['#'+k]) go.freq.combos.merge('#'+k, k);
+    $.each(go.freq.combos.list, function(word, v) {
+      if (word.length < 3) return true;
+      $.each([
+        util.form.plural(word),
+        util.form.past(word),
+        util.form.continuous(word),
+        util.form.more(word),
+        '#'+word
+      ], function(i, wordForm) {
+        if (go.freq.combos.list[wordForm]) go.freq.combos.merge(wordForm, word);
+      });
     });
 
     go.freq.combos.setTop();
