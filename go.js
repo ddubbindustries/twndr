@@ -180,20 +180,37 @@ var go = {
     }
   },
   afterBatch: function() {
-    go.freq.words.topArr = go.freq.words.getTop(function(v){
+
+    var wordFilter = function(k,v){
       return v.count > 1 &&
-        !util.isCommon(v.word) &&
-        !/^@/.test(v.word) &&
-        !util.isInString(v.word, util.getFullGeo(go.cfg.locale));
-    });
-    go.freq.users.topArr = go.freq.users.getTop();
-    go.freq.sources.topArr = go.freq.sources.getTop();
-    go.freq.hashes = {};
-    go.freq.hashes.topArr = go.freq.words.topArr.filter(function(a){
-      return /^#/.test(a.word);
+        !util.isCommon(k) &&
+        !/^@/.test(k) &&
+        !util.isInString(k.replace(/^\#/,''), go.cfg.fullGeo);
+    };
+
+    go.freq.users.setTop();
+    go.freq.sources.setTop();
+    go.freq.words.setTop(wordFilter);
+
+    go.freq.hashes = {
+      topArr: go.freq.words.topArr.filter(function(v){
+        return /^#/.test(v.word);
+      })
+    };
+
+    go.freq.combos = $.extend(true, {}, go.freq.words);
+    go.freq.combos.list = go.freq.combos.filterList(wordFilter);
+
+    $.each(go.freq.combos.list, function(k,v) {
+      if (go.freq.combos.list[k+'s']) go.freq.combos.merge(k+'s', k);
+      if (go.freq.combos.list['#'+k]) go.freq.combos.merge('#'+k, k);
     });
 
-    go.twend = go.freq.words.getTopSeries(go.freq.words.topArr, go.cfg.twendLength);
+    go.freq.combos.setTop();
+
+    go.twendArr = go.freq.combos.topArr;
+    go.twend = go.freq.words.getTopSeries(go.twendArr, go.cfg.twendLength);
+
     console.timeEnd('process');
     go.cfg.afterBatch(go);
   },

@@ -103,7 +103,7 @@ var initBrowser = function(){
         $.each(go.tweetsProc, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
 
         var total = '';
-        $('#twend').html(print.facets(go.freq.words.topArr, function(v){
+        $('#twend').html(print.facets(go.twendArr, function(v){
           total += v.word + ' ';
           return total.length <= go.cfg.twendLength ? '<span>'+twemoji.parse(v.word)+'</span>' : false;
         }));
@@ -115,6 +115,10 @@ var initBrowser = function(){
 
           print.facetColumn('hashtags', print.facets(go.freq.hashes.topArr, function(v){
             return '<li>'+v.word+' '+v.count+'</li>';
+          })),
+
+          print.facetColumn('fuzzy match', print.facets(go.freq.combos.topArr, function(v){
+            return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
 
           print.facetColumn('users', print.facets(go.freq.users.topArr, function(v){
