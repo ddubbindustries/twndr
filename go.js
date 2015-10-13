@@ -199,7 +199,7 @@ var go = {
   afterAll: function() {
     console.timeEnd('total time');
     go.cfg.afterAll(go);
-    if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.api.geocode, go.tweetsRaw);
+    //if (go.cfg.cache && go.tweetsRaw.statuses.length) util.local.store(go.cfg.api.geocode, go.tweetsRaw);
   },
   errorHandler: function(err){
     $('#twend').text(JSON.stringify(err, null, 2));
