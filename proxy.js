@@ -17,25 +17,31 @@ var Twitter = new require('twitter'),
 // http://jsbin.com/yusosumale/1/edit?js,output
 
 http.createServer(function(req, res) {
-	
+
   console.log('request:', new Date().toISOString(), req.url);
-  
+
   if (req.headers.host !== 'p.ddubb.net:'+port || req.url.indexOf('/favicon.ico') > -1) {
     res.writeHead(404)
     res.end();
     return false;
   }
-  
+
   var urlObj = url.parse(req.url, true),
     path = urlObj.pathname.slice(1),
     params = urlObj.query,
     callback = params.callback;
-  
+
   delete params.callback;
 
   client.get(path, params, function(err, data, response){
     if (err) data = err;
-    if (data.statuses) console.log('response tweets', data.statuses.length);
+
+    data.rate_limit = {
+      remaining: response.headers['x-rate-limit-remaining'],
+      reset:     response.headers['x-rate-limit-reset']
+    };
+    
+    if (data.statuses) console.log(data.statuses.length, 'tweets sent', data.rate_limit.remaining, 'rate limit remaining');
     data = JSON.stringify(data);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.end(callback ? callback + '(' + data + ');' : data);
