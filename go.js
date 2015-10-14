@@ -10,7 +10,7 @@ if (typeof(window) == 'undefined') {
 
 var go = {
   cfg: {
-    url: 'http://p.ddubb.net:8080',
+    url: 'http://twndr.com:8080',
     api: {
       q: '',
       geocode: '37.2300,-80.4178,5mi',
@@ -109,7 +109,7 @@ var go = {
     }
 
     var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
-
+    if (!nextPage) console.log('no next page :(');
     if (go.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
