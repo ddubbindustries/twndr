@@ -47,7 +47,7 @@ var go = {
     };
 
     go.twend = 'no tweets found';
-    go.apiCallCount = go.cfg.apiMax;
+    go.apiCount = 0;
     console.log('set globals go.cfg', go.cfg);
 
     go.parseSearch(go.cfg.search);
@@ -92,7 +92,7 @@ var go = {
       dataType: 'JSONP',
       url: go.cfg.url+key,
       success: function(data){
-        console.log('got '+util.getFileSize(data), go.apiCallCount--, 'api calls to go');
+        console.log('got '+go.apiCount+' of '+go.cfg.apiMax+' from API', util.getFileSize(data), data);
         //if (data.statuses) data.statuses = data.statuses.map(function(a){return util.twitter.simplifyObj(a);});
         callback(data);
         //go.tweetsRaw.search_metadata = data.search_metadata,
@@ -173,7 +173,7 @@ var go = {
 
     var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
 
-    if (go.percentDone < 1 && go.apiCallCount > 0 && nextPage) {
+    if (go.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
       go.afterAll();
