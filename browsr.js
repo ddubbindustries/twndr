@@ -142,12 +142,12 @@ var initBrowser = function(){
             return '<li>'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
           }))
         );
-        
+
+        if (!cfg.viz) $('img').addClass('grayscale');
+
         console.timeEnd('print');
       },
       afterAll: function(go) {
-
-        if (!cfg.viz) $('img').addClass('grayscale');
 
         print.fixHeader();
 
