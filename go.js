@@ -28,6 +28,7 @@ var go = {
     search: 'Blacksburg, VA 5mi 48hr',
     twendLength: 140,
     afterGeo: function(){console.log('afterGeo');},
+    processTweet: function(tweet) {console.log('tweet', tweet.text);},
     afterBatch: function(){console.log('afterBatch');},
     afterAll: function(){console.log('afterAll');}
   },
@@ -182,33 +183,30 @@ var go = {
   afterBatch: function() {
 
     var wordFilter = function(k,v){
-      return v.count > 1 &&
-        !util.isCommon(k) &&
-        !/^@/.test(k) &&
-        !util.isInString(k.replace(/^\#/,''), go.cfg.fullGeo);
+      return v.count > 1
+        && !util.isCommon(k)
+        && !/^@/.test(k)
+        && !util.isInString(k.replace(/^\#/,''), go.cfg.fullGeo);
     };
 
+    go.freq.words.filter(wordFilter).setTop();
     go.freq.users.setTop();
     go.freq.sources.setTop();
-    go.freq.words.setTop(wordFilter);
 
-    go.freq.hashes = {
-      topArr: go.freq.words.topArr.filter(function(v){
-        return /^#/.test(v.word);
-      })
-    };
+    go.freq.hashes = $.extend(true, {}, go.freq.words);
+    go.freq.hashes.permaFilter(function(k,v){
+      return wordFilter(k,v) && /^#/.test(k);
+    }).setTop();
 
-    go.freq.emoji = {
-      topArr: go.freq.words.topArr.filter(function(v){
-        return v.word.length <=2 && util.emojiRgx.test(v.word);
-      })
-    };
+    go.freq.emoji = $.extend(true, {}, go.freq.words);
+    go.freq.emoji.permaFilter(function(k,v){
+      return wordFilter(k,v) && k.length <= 2 && util.emojiRgx.test(k);
+    }).setTop();
 
     go.freq.combos = $.extend(true, {}, go.freq.words);
-    go.freq.combos.list = go.freq.combos.filterList(wordFilter);
+    go.freq.combos.permaFilter(wordFilter);
 
     $.each(go.freq.combos.list, function(word, v) {
-      if (word.length < 3) return true;
       $.each([
         util.form.plural(word),
         util.form.past(word),
