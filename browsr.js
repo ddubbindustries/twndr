@@ -130,7 +130,8 @@ var initBrowser = function(){
 
           print.facetColumn('combos', print.facets(go.freq.combos.topArr, function(v){
             var title = v.forms ? v.forms.join(', ') : '';
-            return '<li title="'+title+'">'+twemoji.parse(v.word)+' '+v.count+'</li>';
+            return '<li title="'+title+'">'+twemoji.parse(v.word)+
+              ' '+v.count+(v.forms ? '*' : '')+'</li>';
           })),
 
           print.facetColumn('emoji', print.facets(go.freq.emoji.topArr, function(v){
