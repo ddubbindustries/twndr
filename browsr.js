@@ -129,9 +129,8 @@ var initBrowser = function(){
           })),
 
           print.facetColumn('combos', print.facets(go.freq.combos.topArr, function(v){
-            var title = v.forms ? v.forms.join(', ') : '';
-            return '<li title="'+title+'">'+twemoji.parse(v.word)+
-              ' '+v.count+(v.forms ? '*' : '')+'</li>';
+            var forms = (v.forms.length > 1 ? v.forms.join(', ') : '');
+            return '<li title="'+forms+'">'+twemoji.parse(v.word)+' '+v.count+(forms ? '*' : '')+'</li>';
           })),
 
           print.facetColumn('emoji', print.facets(go.freq.emoji.topArr, function(v){
@@ -143,8 +142,9 @@ var initBrowser = function(){
               go.freq.users.list[v.word].meta.profile_image_url+'"> '+v.count+'</li>';
           })),
 
-          print.facetColumn('src', print.facets(go.freq.sources.topArr, function(v){
-            return '<li>'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
+          print.facetColumn('sources', print.facets(go.freq.sources.topArr, function(v){
+            var title = (v.percent*100).toPrecision(2)+'%';
+            return '<li title="'+title+'">'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
           }))
         );
 
