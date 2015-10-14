@@ -125,7 +125,7 @@ var initBrowser = function(){
           })),
 
           print.facetColumn('fuzzy match', print.facets(go.freq.combos.topArr, function(v){
-            var title = v.forms ? v.forms.join(', ') : ''; 
+            var title = v.forms ? v.forms.join(', ') : '';
             return '<li title="'+title+'">'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
 
@@ -142,9 +142,12 @@ var initBrowser = function(){
             return '<li>'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
           }))
         );
+        
         console.timeEnd('print');
       },
       afterAll: function(go) {
+
+        if (!cfg.viz) $('img').addClass('grayscale');
 
         print.fixHeader();
 

@@ -95,3 +95,7 @@ img[src*='profile_images'] {
   border-radius: 50%;
   Xbox-shadow: 1px 1px 5px gray;
 }
+img.grayscale {
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
