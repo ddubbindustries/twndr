@@ -198,6 +198,12 @@ var go = {
       })
     };
 
+    go.freq.emoji = {
+      topArr: go.freq.words.topArr.filter(function(v){
+        return v.word.length <=2 && util.emojiRgx.test(v.word);
+      })
+    };
+
     go.freq.combos = $.extend(true, {}, go.freq.words);
     go.freq.combos.list = go.freq.combos.filterList(wordFilter);
 
@@ -210,7 +216,7 @@ var go = {
         util.form.more(word),
         '#'+word
       ], function(i, wordForm) {
-        if (go.freq.combos.list[wordForm]) go.freq.combos.merge(wordForm, word);
+        go.freq.combos.merge(wordForm, word);
       });
     });
 
