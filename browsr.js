@@ -24,7 +24,8 @@ var print = {
             $img.wrap('<span class="hilight"></span>');
           } else {
             $text.html(function(i,html){
-              var rgx = v.forms ? v.forms.map(function(v){return '\\b'+v+'\\b';}).join('|') : v.word;
+              var wordArr = v.forms ? v.forms : [v.word];
+                  rgx = wordArr.map(function(a){return '\\b'+a+'\\b';}).join('|');
               return html.replace(new RegExp(rgx, 'ig'), '<span class="hilight">$&</span>');
             });
           }
