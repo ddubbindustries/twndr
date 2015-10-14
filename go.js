@@ -10,7 +10,7 @@ if (typeof(window) == 'undefined') {
 
 var go = {
   cfg: {
-    url: 'http://twndr.com:8080',
+    url: 'http://p.ddubb.net:8080',
     api: {
       q: '',
       geocode: '37.2300,-80.4178,5mi',
