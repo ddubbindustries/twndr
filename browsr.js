@@ -39,7 +39,9 @@ var print = {
   },
   facetColumn: function(name, content) {
     return $('<div id="'+name+'" class="col"/>').append(
-      $('<div class="note"/>').html(name),
+      $('<div class="note"/>').click(function(){
+        console.log('freq', name, freq[name]);
+      }).html(name),
       $('<ol class="freq scroll"/>').html(content)
     );
   },
@@ -54,7 +56,8 @@ var initCfg = {
     search: 'Blacksburg, VA 5mi 48hr',
     viz: false
   },
-  cfg = $.extend(initCfg, util.local.get('cfg'));
+  cfg = $.extend(initCfg, util.local.get('cfg')),
+  freq = {};
 
 var initBrowser = function(){
   var $out = $('#out'),
@@ -120,11 +123,11 @@ var initBrowser = function(){
             return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
 
-          print.facetColumn('hashtags', print.facets(go.freq.hashes.topArr, function(v){
+          print.facetColumn('hashes', print.facets(go.freq.hashes.topArr, function(v){
             return '<li>'+v.word+' '+v.count+'</li>';
           })),
 
-          print.facetColumn('fuzzy match', print.facets(go.freq.combos.topArr, function(v){
+          print.facetColumn('combos', print.facets(go.freq.combos.topArr, function(v){
             var title = v.forms ? v.forms.join(', ') : '';
             return '<li title="'+title+'">'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
@@ -159,8 +162,9 @@ var initBrowser = function(){
           if (cfg.viz) markers[$(this).attr('id')].setAnimation(null);
         });
 
+        freq = go.freq; // for general inspection purposes
+
         console.log('all done! tweetsProc:', go.twend, go.tweetsProc);
-        freq = go.freq;
       }
     });
   }).submit();
