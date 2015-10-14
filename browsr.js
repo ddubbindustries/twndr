@@ -55,17 +55,18 @@ var print = {
 
 var initCfg = {
     search: 'Blacksburg, VA 5mi 48hr',
-    viz: false
+    viz: true
   },
   cfg = $.extend(initCfg, util.local.get('cfg')),
   freq = {};
 
 var initBrowser = function(){
-  var $out = $('#out'),
+  var $input = $('#input'),
+      $out = $('#out'),
       $stats = $('#stats'),
       $search = $('#search').val(cfg.search);
 
-  $('#input').submit(function(e){
+  $input.submit(function(e){
     e.preventDefault();
     cfg.search = $search.val();
     util.local.store('cfg', cfg);
@@ -76,7 +77,12 @@ var initBrowser = function(){
     var Twndr = new Go({
       search: cfg.search,
       afterGeo: function(geocode) {
-        if (cfg.viz) { initMap(geocode); } else { $('#map-canvas').hide(); }
+        if (cfg.viz) { 
+          $('#map-canvas').show();
+          initMap(geocode);
+        } else {
+          $('#map-canvas').hide();
+        }
       },
       processTweet: function(tweet) {
 
@@ -173,6 +179,12 @@ var initBrowser = function(){
 
   $('#cache').click(function(){
     localStorage.clear();
+  });
+
+  $('#viz').click(function(){
+    cfg.viz = !cfg.viz;
+    util.local.store('cfg', cfg);
+    $input.submit();
   });
 };
 
