@@ -102,6 +102,20 @@ var go = {
       error: go.errorHandler
     });
   },
+  router: function(data){
+    if (data.statuses.length) {
+      go.process(data.statuses),
+      go.afterBatch();
+    }
+
+    var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
+
+    if (go.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
+      go.getAPI('/search/tweets', nextPage.slice(1), go.router);
+    } else {
+      go.afterAll();
+    }
+  },
   process: function(arr) {
     var tweetTime = 0,
         hoursRelative = 0,
@@ -164,20 +178,6 @@ var go = {
       }
     });
     go.percentDone = hoursRelative / -go.cfg.hoursHistory;
-  },
-  router: function(data){
-    if (data.statuses.length) {
-      go.process(data.statuses),
-      go.afterBatch();
-    }
-
-    var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
-
-    if (go.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
-      go.getAPI('/search/tweets', nextPage.slice(1), go.router);
-    } else {
-      go.afterAll();
-    }
   },
   afterBatch: function() {
 
