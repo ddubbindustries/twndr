@@ -40,8 +40,9 @@ http.createServer(function(req, res) {
       remaining: response.headers['x-rate-limit-remaining'],
       reset:     response.headers['x-rate-limit-reset']
     };
+
+    if (data.statuses) console.log(data.statuses.length+' tweets sent', data.rate_limit.remaining, 'rate limit remaining');
     
-    if (data.statuses) console.log(data.statuses.length, 'tweets sent', data.rate_limit.remaining, 'rate limit remaining');
     data = JSON.stringify(data);
     res.writeHead(200, {"Content-Type": "application/json"});
     res.end(callback ? callback + '(' + data + ');' : data);
