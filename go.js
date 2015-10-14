@@ -189,14 +189,8 @@ var go = {
         && !util.isInString(k.replace(/^\#/,''), go.cfg.fullGeo);
     };
 
-    go.freq.words.filter(wordFilter).setTop();
     go.freq.users.setTop();
     go.freq.sources.setTop();
-
-    go.freq.hashes = $.extend(true, {}, go.freq.words);
-    go.freq.hashes.permaFilter(function(k,v){
-      return wordFilter(k,v) && /^#/.test(k);
-    }).setTop();
 
     go.freq.emoji = $.extend(true, {}, go.freq.words);
     go.freq.emoji.permaFilter(function(k,v){

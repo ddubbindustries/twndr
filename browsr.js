@@ -77,7 +77,7 @@ var initBrowser = function(){
     var Twndr = new Go({
       search: cfg.search,
       afterGeo: function(geocode) {
-        if (cfg.viz) { 
+        if (cfg.viz) {
           $('#map-canvas').show();
           initMap(geocode);
         } else {
@@ -126,17 +126,8 @@ var initBrowser = function(){
         }));
 
         $('#facets').empty().append(
-          print.facetColumn('words', print.facets(go.freq.words.topArr, function(v){
-            return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
-          })),
-
-          print.facetColumn('hashes', print.facets(go.freq.hashes.topArr, function(v){
-            return '<li>'+v.word+' '+v.count+'</li>';
-          })),
-
           print.facetColumn('combos', print.facets(go.freq.combos.topArr, function(v){
-            var forms = (v.forms.length > 1 ? v.forms.join(', ') : '');
-            return '<li title="'+forms+'">'+twemoji.parse(v.word)+' '+v.count+(forms ? '*' : '')+'</li>';
+            return '<li>'+twemoji.parse(v.forms.join(', '))+' '+v.count+'</li>';
           })),
 
           print.facetColumn('emoji', print.facets(go.freq.emoji.topArr, function(v){
