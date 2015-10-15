@@ -210,7 +210,7 @@ var go = {
         util.form.more(word),
         '#'+word
       ], function(i, wordForm) {
-        go.freq.combos.merge(wordForm, word);
+        go.freq.combos.merge(wordForm, word, 3);
       });
     });
 
