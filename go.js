@@ -44,6 +44,7 @@ var go = {
 
     go.freq = {
       words: new Lex(),
+      digrams: new Lex(),
       users: new Lex(),
       sources: new Lex()
     };
@@ -172,9 +173,19 @@ var go = {
 
       // just right!
       } else {
-        go.freq.words.addChunk(tweet.text, tweet.id_str);
-        go.freq.users.tally('@'+tweet.user.screen_name, tweet.id_str, tweet.user);
-        go.freq.sources.tally(tweet.source, tweet.id_str);
+
+        tweet._tokens = go.freq.words.tokenize(tweet.text);
+
+        tweet._digrams = tweet._tokens
+          .map(function(v,k,arr){
+            if (arr[k+1] && !(util.isCommon(v) || util.isCommon(arr[k+1]))) return v+' '+arr[k+1];
+          })
+          .filter(function(v){return v;});
+
+        go.freq.words.addChunk(tweet._tokens, tweet.id_str, tweet.user.id_str);
+        go.freq.digrams.addChunk(tweet._digrams, tweet.id_str, tweet.user.id_str);
+        go.freq.users.tally('@'+tweet.user.screen_name, tweet.id_str, tweet.user.id_str, tweet.user);
+        go.freq.sources.tally(tweet.source, tweet.id_str, tweet.id_str);
 
         go.cfg.processTweet(tweet);
         go.tweetsProc.ok[tweet.id_str] = tweet;
@@ -210,11 +221,16 @@ var go = {
         util.form.more(word),
         '#'+word
       ], function(i, wordForm) {
-        go.freq.combos.merge(wordForm, word, 3);
+        go.freq.combos.mergeTokens(wordForm, word, 3);
       });
     });
 
+    go.freq.digrams.permaFilter(wordFilter);
+    go.freq.combos.featherList(go.freq.digrams.list);
+
     go.freq.combos.setTop();
+    go.freq.digrams.setTop();
+    //go.freq.combos.concat(0.5).setTop();
 
     go.twendArr = go.freq.combos.topArr;
     go.twend = go.freq.words.getTopSeries(go.twendArr, go.cfg.twendLength);

@@ -137,6 +137,10 @@ var initBrowser = function(){
             return '<li>'+twemoji.parse(v.forms.join(', '))+' '+v.count+'</li>';
           })),
 
+          print.facetColumn('digrams', print.facets(go.freq.digrams.topArr, function(v){
+            return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
+          })),
+
           print.facetColumn('emoji', print.facets(go.freq.emoji.topArr, function(v){
             return '<li>'+twemoji.parse(v.word)+' '+v.count+'</li>';
           })),
