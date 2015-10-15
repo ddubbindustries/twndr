@@ -1,4 +1,12 @@
 var print = {
+  stats: function(obj) {
+    var out = [
+      (obj.stats.percentDone*100).toFixed()+'% of history',
+      ((180 - obj.stats.rateLimit)/180*100).toFixed()+'% of api limit',
+    ];
+    $.each(obj.tweetsProc, function(k,v){ out.push(k+': '+Object.keys(v).length); });
+    return out.join(' • ');
+  },
   facets: function(arr, itemTemplate) {
     var $printOut = $('<div/>');
 
@@ -116,11 +124,7 @@ var initBrowser = function(){
       afterBatch: function(go){
         console.time('print');
 
-        $stats.html(
-          (go.stats.percentDone*100).toFixed()+'% of history, '+
-          ((180 - go.stats.rateLimit)/180*100).toFixed()+'% of api limit, '
-        );
-        $.each(go.tweetsProc, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
+        $stats.html(print.stats(go));
 
         var total = '';
         $('#twend').html(print.facets(go.twendArr, function(v){
