@@ -40,6 +40,7 @@ var go = {
     });
     go.tweetsRaw = util.local.get(go.cfg.api.geocode) || {statuses:[]};
     go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+    go.stats = {};
 
     go.freq = {
       words: new Lex(),
@@ -105,13 +106,14 @@ var go = {
   },
   router: function(data){
     if (data.statuses.length) {
-      go.process(data.statuses),
+      go.process(data.statuses);
+      go.stats.rateLimit = data.rate_limit.remaining;
       go.afterBatch();
     }
 
     var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
     if (!nextPage) console.log('no next page :(');
-    if (go.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
+    if (go.stats.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
       go.afterAll();
@@ -178,7 +180,7 @@ var go = {
         go.tweetsProc.ok[tweet.id_str] = tweet;
       }
     });
-    go.percentDone = hoursRelative / -go.cfg.hoursHistory;
+    go.stats.percentDone = hoursRelative / -go.cfg.hoursHistory;
   },
   afterBatch: function() {
 

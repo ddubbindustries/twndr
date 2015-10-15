@@ -116,7 +116,10 @@ var initBrowser = function(){
       afterBatch: function(go){
         console.time('print');
 
-        $stats.html((go.percentDone*100).toFixed()+'% of history ');
+        $stats.html(
+          (go.stats.percentDone*100).toFixed()+'% of history, '+
+          ((180 - go.stats.rateLimit)/180*100).toFixed()+'% of api limit, '
+        );
         $.each(go.tweetsProc, function(k,v){ $stats.append(k+': '+Object.keys(v).length+' '); });
 
         var total = '';
