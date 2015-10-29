@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+    <script src="../lib/util.js"></script>
+    <script src="../lib/lexr.js"></script>
+    <script src="taggr.js"></script>
+    <meta charset="utf-8">
+    <title>Get Classy</title>
+    <style>
+      body {
+        font: 12px sans-serif;
+      }
+      ol {
+        padding-left: 2em;
+      }
+      .col {
+        display: table-cell;
+        padding-right: 1em;
+        vertical-align: middle;
+      }
+      .row {
+        display: table-row;
+      }
+      .email:nth-child(odd) {
+        background: #eee;
+      }
+      .email .text {
+        width: 25%;
+        white-space: pre-wrap;
+      }
+      .tag {
+        display: inline-block;
+        background: white;
+        color: cornflowerblue;
+        border: 2px solid cornflowerblue;
+        cursor: pointer;
+        padding: 0.5em 1em;
+        border-radius: 1em;
+        margin: 0 1em 1em 0;
+      }
+      .tagged, .tag:hover {
+        background: cornflowerblue !important;
+        color: white !important;
+      }
+      .suggested {
+        background: lightgoldenrodyellow;
+        color: goldenrod;
+        border-color: goldenrod;
+      }
+      .scroll {
+        height: 100px;
+        overflow: hidden;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body ng-app ng-controller="view" ng-init="getjson()">
+    <h1>Get Classy</h1>
+    <div ng-if="!msg && !data.length">no results</div>
+    <div ng-repeat="(i,email) in data | limitTo: 100" class="email row" ng-init="preset(email)">
+      <div class="text col" ng-click="email.showTokens = !email.showTokens">
+        <div class="scroll">{{i}}: {{email.body}}</div>
+      </div>
+      <div class="tags col" ng-init="tagProbs = getTagProbs(email.body)">
+        <div ng-repeat="tag in tags" ng-click="toggleTag(tag, email);"
+          class="tag" ng-class="{tagged: (map[tag].ids.indexOf(email.header.messageId) > -1), suggested: tagProbs[tag].rank == 1}">
+          {{tagProbs[tag].rank}} {{tag}} |
+          {{tagProbs[tag].prob | number: 2}} |
+          freq: {{map[tag].getFrequency() | number: 2}}
+
+          <ol ng-if="email.showTokens">
+            <li ng-repeat="word in map[tag].tokens.topArr | orderBy: word.prob | filter: greaterThan('count', 2)" class="row">
+              <span class="col">{{word.word}}</span>
+              <span class="col">{{word.count}}</span>
+              <span class="col">{{word.prob | number: 5}}</span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
