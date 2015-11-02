@@ -230,7 +230,6 @@ var go = {
 
     go.freq.combos.setTop();
     go.freq.digrams.setTop();
-    //go.freq.combos.concat(0.5).setTop();
 
     go.twendArr = go.freq.combos.topArr;
     go.twend = go.freq.words.getTopSeries(go.twendArr, go.cfg.twendLength);
