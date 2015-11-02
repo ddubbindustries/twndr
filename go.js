@@ -21,7 +21,6 @@ var go = {
     apiMax: 20,
     cache: true,
     maxRetweet: 10,
-    maxPerUser: 10,
     locale: 'Blacksburg, VA',
     radius: '5mi',
     hoursHistory: 48,
@@ -39,7 +38,7 @@ var go = {
       go.cfg[k] = v;
     });
     go.tweetsRaw = util.local.get(go.cfg.api.geocode) || {statuses:[]};
-    go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, chatty: {}, nogeo: {}};
+    go.tweetsProc = {raw: {}, ok: {}, bot: {}, rt: {}, reply: {}, nogeo: {}};
     go.stats = {};
 
     go.freq = {
@@ -159,13 +158,6 @@ var go = {
       // too direct of a reply
       } else if (tweet.in_reply_to_user_id_str) {
         go.tweetsProc.reply[tweet.id_str] = tweet;
-
-      // too chatty of a user
-      } else if (
-        go.freq.users.list['@'+tweet.user.screen_name] &&
-        go.freq.users.list['@'+tweet.user.screen_name].count >= go.cfg.maxPerUser
-      ) {
-        go.tweetsProc.chatty[tweet.id_str] = tweet;
 
       // too out of bounds
       } else if (!tweet.geo) {
