@@ -228,7 +228,7 @@ var go = {
       .setTop();
 
     go.twendArr = go.freq.combos.topArr;
-    go.twend = go.freq.words.getTopSeries(go.twendArr, go.cfg.twendLength);
+    go.twend = go.freq.combos.getTopSeries(go.cfg.twendLength);
 
     console.timeEnd('process');
     go.cfg.afterBatch(go);
