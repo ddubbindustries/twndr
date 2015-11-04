@@ -205,17 +205,13 @@ var go = {
     go.freq.combos = $.extend(true, {}, go.freq.words);
     go.freq.combos.permaFilter(wordFilter);
 
-    $.each(go.freq.combos.list, function(word, v) {
-      $.each([
-        util.form.plural(word),
-        util.form.past(word),
-        util.form.continuous(word),
-        util.form.more(word),
-        '#'+word
-      ], function(i, wordForm) {
-        go.freq.combos.mergeTokens(wordForm, word, 3);
-      });
-    });
+    go.freq.combos.mergeForms([
+      util.wordform.plural,
+      util.wordform.past,
+      util.wordform.continuous,
+      util.wordform.greater,
+      util.wordform.hashtag
+    ]);
 
     go.freq.digrams.permaFilter(wordFilter);
     go.freq.combos.featherList(go.freq.digrams.list);
