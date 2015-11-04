@@ -153,6 +153,10 @@ var initBrowser = function(){
           print.facetColumn('sources', print.facets(go.freq.sources.topArr, function(v){
             var title = (v.percent*100).toPrecision(2)+'%';
             return '<li title="'+title+'">'+util.getFaviconFromAnchor(v.word)+' '+v.count+'</li>';
+          })),
+
+          print.facetColumn('locations', print.facets(go.freq.locations.topArr, function(v){
+            return '<li>'+v.word+' '+v.count+'</li>';
           }))
         );
 

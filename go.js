@@ -45,7 +45,8 @@ var go = {
       words: new Lex(),
       digrams: new Lex(),
       users: new Lex(),
-      sources: new Lex()
+      sources: new Lex(),
+      locations: new Lex()
     };
 
     go.twend = 'no tweets found';
@@ -166,13 +167,17 @@ var go = {
       // just right!
       } else {
 
-        tweet._tokens = go.freq.words.tokenize(tweet.text);
+        tweet = util.twitter.parseTweet(tweet);
+
+        tweet._tokens = go.freq.words.tokenize(tweet._text);
 
         tweet._digrams = tweet._tokens
           .map(function(v,k,arr){
             if (arr[k+1] && !(util.isCommon(v) || util.isCommon(arr[k+1]))) return v+' '+arr[k+1];
           })
           .filter(function(v){return v;});
+
+        if (tweet._location) go.freq.locations.tally(tweet._location, tweet.id_str, tweet.user.id_str);
 
         go.freq.words.addChunk(tweet._tokens, tweet.id_str, tweet.user.id_str, {authorUnique: true});
         go.freq.digrams.addChunk(tweet._digrams, tweet.id_str, tweet.user.id_str);
