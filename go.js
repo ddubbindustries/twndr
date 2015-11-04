@@ -173,14 +173,14 @@ var go = {
 
         tweet._digrams = tweet._tokens
           .map(function(v,k,arr){
-            if (arr[k+1] && !(util.isCommon(v) || util.isCommon(arr[k+1]))) return v+' '+arr[k+1];
+            if (arr[k+1]) return v+' '+arr[k+1];
           })
           .filter(function(v){return v;});
 
         if (tweet._location) go.freq.locations.tally(tweet._location, tweet.id_str, tweet.user.id_str);
 
         go.freq.words.addChunk(tweet._tokens, tweet.id_str, tweet.user.id_str, {authorUnique: true});
-        go.freq.digrams.addChunk(tweet._digrams, tweet.id_str, tweet.user.id_str);
+        go.freq.digrams.addChunk(tweet._digrams, tweet.id_str, tweet.user.id_str, {authorUnique: true});
         go.freq.users.tally('@'+tweet.user.screen_name, tweet.id_str, tweet.user.id_str, {meta: tweet.user});
         go.freq.sources.tally(tweet.source, tweet.id_str, tweet.id_str);
 
