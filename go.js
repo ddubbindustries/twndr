@@ -20,7 +20,7 @@ var go = {
     },
     apiMax: 20,
     cache: true,
-    maxRetweet: 10,
+    maxRetweet: Infinity,
     locale: 'Blacksburg, VA',
     radius: '5mi',
     hoursHistory: 48,
@@ -157,7 +157,7 @@ var go = {
         go.tweetsProc.rt[tweet.id_str] = tweet;
 
       // too direct of a reply
-      } else if (tweet.in_reply_to_user_id_str) {
+      } else if (go.cfg.filterReplies && tweet.in_reply_to_user_id_str) {
         go.tweetsProc.reply[tweet.id_str] = tweet;
 
       // too out of bounds
