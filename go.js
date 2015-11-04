@@ -201,6 +201,7 @@ var go = {
 
     go.freq.users.setTop();
     go.freq.sources.setTop();
+    go.freq.locations.setTop();
 
     go.freq.emoji = $.extend(true, {}, go.freq.words);
     go.freq.emoji.permaFilter(function(k,v){
