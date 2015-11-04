@@ -182,7 +182,7 @@ var go = {
         go.freq.words.addChunk(tweet._tokens, tweet.id_str, tweet.user.id_str, {authorUnique: true});
         go.freq.digrams.addChunk(tweet._digrams, tweet.id_str, tweet.user.id_str, {authorUnique: true});
         go.freq.users.tally('@'+tweet.user.screen_name, tweet.id_str, tweet.user.id_str, {meta: tweet.user});
-        go.freq.sources.tally(tweet.source, tweet.id_str, tweet.id_str);
+        go.freq.sources.tally(tweet.source, tweet.id_str, tweet.user.id_str);
 
         go.cfg.processTweet(tweet);
         go.tweetsProc.ok[tweet.id_str] = tweet;
