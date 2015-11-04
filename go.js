@@ -109,7 +109,7 @@ var go = {
     if (data.statuses.length) {
       go.process(data.statuses);
       go.stats.rateLimit = data.rate_limit.remaining;
-      go.afterBatch();
+      //go.afterBatch();
     }
 
     var nextPage = data.search_metadata ? data.search_metadata.next_results : false;
@@ -117,6 +117,7 @@ var go = {
     if (go.stats.percentDone < 1 && go.apiCount++ < go.cfg.apiMax && nextPage) {
       go.getAPI('/search/tweets', nextPage.slice(1), go.router);
     } else {
+      go.afterBatch();
       go.afterAll();
     }
   },
