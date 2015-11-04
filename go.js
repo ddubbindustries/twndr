@@ -210,21 +210,22 @@ var go = {
     }).setTop();
 
     go.freq.combos = $.extend(true, {}, go.freq.words);
-    go.freq.combos.permaFilter(wordFilter);
 
-    go.freq.combos.mergeForms([
-      util.wordform.plural,
-      util.wordform.past,
-      util.wordform.continuous,
-      util.wordform.greater,
-      util.wordform.hashtag
-    ]);
+    go.freq.digrams
+      .permaFilter(wordFilter)
+      .setTop();
 
-    go.freq.digrams.permaFilter(wordFilter);
-    go.freq.combos.featherList(go.freq.digrams.list);
-
-    go.freq.combos.setTop();
-    go.freq.digrams.setTop();
+    go.freq.combos
+      .mergeForms([
+        util.wordform.plural,
+        util.wordform.past,
+        util.wordform.continuous,
+        util.wordform.greater,
+        util.wordform.hashtag
+      ])
+      .featherList(go.freq.digrams.list)
+      .permaFilter(wordFilter)
+      .setTop();
 
     go.twendArr = go.freq.combos.topArr;
     go.twend = go.freq.words.getTopSeries(go.twendArr, go.cfg.twendLength);
